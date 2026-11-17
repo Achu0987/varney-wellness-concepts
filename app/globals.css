@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #080e20;
+  --navy-2: #0d1630;
+  --navy-3: #141f44;
+  --violet: #7557ff;
+  --ice: #8bdfff;
+  --cool: #aab6c8;
+  --m: clamp(18px, 3.4vw, 56px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+html { -webkit-text-size-adjust: 100%; background: var(--navy); }
+body {
+  margin: 0; background: var(--navy); color: #fff; overflow-x: hidden;
+  font-family: Satoshi, 'Segoe UI', system-ui, sans-serif; font-size: 1.0625rem; line-height: 1.55;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+h1, h2, h3, h4 { font-family: 'Clash Display', 'Segoe UI', system-ui, sans-serif; font-weight: 600; margin: 0; word-spacing: 0.1em; }
+p { margin: 0; }
+::selection { background: var(--violet); color: #fff; }
+:focus-visible { outline: 3px solid var(--ice); outline-offset: 3px; }
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.06);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    backdrop-filter: blur(24px) saturate(1.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  }
+  .display { font-family: 'Clash Display', 'Segoe UI', system-ui, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: -0.025em; line-height: 0.92; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; min-height: 56px; padding: 0 1.9rem; border-radius: 999px; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.01em; cursor: pointer; border: 0; text-decoration: none; transition: background-color 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease); white-space: nowrap; }
+  .btn-ice { background: var(--ice); color: var(--navy); box-shadow: 0 0 0 0 rgba(139, 223, 255, 0); }
+  .btn-ice:hover { background: #fff; box-shadow: 0 0 50px 0 rgba(139, 223, 255, 0.45); }
+  .btn-glass { color: #fff; background: rgba(255, 255, 255, 0.08); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); }
+  .btn-glass:hover { background: rgba(255, 255, 255, 0.16); }
+  .btn-violet { background: var(--violet); color: #fff; }
+  .btn-violet:hover { background: #8a72ff; box-shadow: 0 0 60px 0 rgba(117, 87, 255, 0.55); }
+}
+
+.mask-line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--ice); color: var(--navy); padding: 10px 16px; border-radius: 99px; z-index: 100; }
+.skip:focus { left: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* light concept headings */
+.h-gs { font-family: 'General Sans', Satoshi, 'Segoe UI', system-ui, sans-serif; font-weight: 600; letter-spacing: -0.035em; word-spacing: normal; }
+
+/* HUD animation */
+.hud-line { stroke-dasharray: 400; stroke-dashoffset: 400; animation: hud-draw 3.2s linear infinite; }
+.hud-ring { animation: hud-spin 4s ease-in-out infinite alternate; }
+@keyframes hud-draw { to { stroke-dashoffset: 0; } }
+@keyframes hud-spin { from { stroke-dashoffset: 90; } to { stroke-dashoffset: 20; } }
+
+/* hide the page scrollbar (scrolling still works) */
+html, body {
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; } /* Chrome, Safari */
+
+/* party invitation sparkles */
+.pi-spark { opacity: 0; animation: pi-twinkle 4.2s ease-in-out infinite; box-shadow: 0 0 10px currentColor; }
+@keyframes pi-twinkle { 0%, 100% { opacity: 0; transform: translateY(0) scale(0.6); } 50% { opacity: 0.9; transform: translateY(-18px) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .pi-spark { animation: none; opacity: 0.5; } }

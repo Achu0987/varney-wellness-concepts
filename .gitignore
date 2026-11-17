@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+.vercel/
+*.log
+.env*
+# local working files, not part of the site
+_archive/
+.taste-skill/
+.impeccable/
+Reference/
+public/preview/
+public/stock/
