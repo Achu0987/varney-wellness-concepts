@@ -499,25 +499,25 @@ function Cta() {
     <section id="contact" className="px-2.5 pb-4 md:px-4">
       <div className="on-color relative overflow-hidden rounded-[1.75rem] bg-violet px-6 py-16 text-white md:rounded-[2.25rem] md:px-14 md:py-24">
         <div className="relative z-10 max-w-[38rem]">
-          <h2 className="h-gs text-[clamp(2.2rem,4.6vw,4.4rem)] leading-[1.02]">Your next chapter starts here.</h2>
-          <p className="mt-5 text-[1.15rem] text-white/85">Discover a more personal approach to wellness.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <h2 data-reveal className="h-gs text-[clamp(2.2rem,4.6vw,4.4rem)] leading-[1.02]">Your next chapter starts here.</h2>
+          <p data-reveal="0.1" className="mt-5 text-[1.15rem] text-white/85">Discover a more personal approach to wellness.</p>
+          <div data-reveal="0.2" className="mt-8 flex flex-wrap gap-3">
             <a href="#contact" onClick={(e) => { e.preventDefault(); toast('Consultation booking is not part of this concept preview.'); }} className="group inline-flex h-12 items-center gap-3 rounded-full bg-white pl-1.5 pr-5 font-semibold text-navy">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-violet text-white transition-transform group-hover:rotate-45"><ArrowUpRight size={17} /></span>Book a Consultation
             </a>
             <a href="#party" onClick={(e) => go(e, '#party')} className="inline-flex h-12 items-center rounded-full px-5 font-semibold text-white ring-1 ring-white/70 hover:bg-white/15">Plan a private party</a>
           </div>
         </div>
-        <div className="pointer-events-none absolute -bottom-10 right-0 hidden h-[115%] w-[44%] md:block">
+        <div data-reveal="0.15" className="pointer-events-none absolute -bottom-10 right-0 hidden h-[115%] w-[44%] md:block">
           <CellCanvas className="h-full w-full" xray={0.15} cam={[0, 0.2, 8]} />
         </div>
       </div>
       <footer className="mx-auto mt-10 max-w-[1320px] px-3 pb-10 text-[0.92rem] text-white/65">
         <div className="grid gap-8 md:grid-cols-4">
-          <div><p className="h-gs text-[1.3rem] text-white">Varney <span className="text-ice">Wellness</span></p><p className="mt-2">Physician-led wellness, designed around you.</p></div>
-          <div><p className="font-semibold text-white">Explore</p><ul className="mt-2 grid gap-1">{LINKS.map(([l, h]) => <li key={h}><a href={h} onClick={(e) => go(e, h)} className="hover:text-white">{l}</a></li>)}</ul></div>
-          <div><p className="font-semibold text-white">Visit</p><p className="mt-2">Address placeholder<br />Florida, USA<br />Hours to be confirmed</p></div>
-          <div><p className="font-semibold text-white">Contact</p><p className="mt-2">Phone and email to be supplied by the practice.</p></div>
+          <div data-reveal><p className="h-gs text-[1.3rem] text-white">Varney <span className="text-ice">Wellness</span></p><p className="mt-2">Physician-led wellness, designed around you.</p></div>
+          <div data-reveal="0.08"><p className="font-semibold text-white">Explore</p><ul className="mt-2 grid gap-1">{LINKS.map(([l, h]) => <li key={h}><a href={h} onClick={(e) => go(e, h)} className="hover:text-white">{l}</a></li>)}</ul></div>
+          <div data-reveal="0.16"><p className="font-semibold text-white">Visit</p><p className="mt-2">Address placeholder<br />Florida, USA<br />Hours to be confirmed</p></div>
+          <div data-reveal="0.24"><p className="font-semibold text-white">Contact</p><p className="mt-2">Phone and email to be supplied by the practice.</p></div>
         </div>
         <p className="mt-10 text-[0.8rem] text-white/45">Concept 01 of 03, illustrative preview (not a live medical website). Credits: chest X-ray by Mikael Häggström (CC0, Wikimedia Commons), shown as a hologram; 3D elements built in code for this concept; photos from Unsplash (stock placeholders).</p>
       </footer>
@@ -544,8 +544,14 @@ export default function LightPage() {
       gsap.ticker.add(tick);
       gsap.ticker.lagSmoothing(0);
     }
+    // one shared reveal for every block marked data-reveal (sections without their own scroll story)
+    const rctx = reduced ? null : gsap.context(() => {
+      gsap.utils.toArray('[data-reveal]').forEach((el) => {
+        gsap.fromTo(el, { y: 48, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease: 'power3.out', delay: Number(el.dataset.reveal) || 0, scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
+      });
+    });
     const t = setTimeout(() => ScrollTrigger.refresh(), 1200);
-    return () => { clearTimeout(t); if (tick) gsap.ticker.remove(tick); lenis?.destroy(); window.__lenis = null; };
+    return () => { clearTimeout(t); rctx?.revert(); if (tick) gsap.ticker.remove(tick); lenis?.destroy(); window.__lenis = null; };
   }, []);
 
   return (

@@ -226,16 +226,16 @@ export function Services() {
   return (
     <section id="services" ref={root} className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden py-20">
       <div className="flex flex-wrap items-end justify-between gap-6 px-[var(--m)]">
-        <div><Label>Our services</Label><h2 className="h-gs mt-6 text-[clamp(2.4rem,5vw,5rem)] leading-[1.02]">Care that <Grad>moves with you</Grad></h2></div>
+        <div data-reveal><Label>Our services</Label><h2 className="h-gs mt-6 text-[clamp(2.4rem,5vw,5rem)] leading-[1.02]">Care that <Grad>moves with you</Grad></h2></div>
         <div className="flex items-center gap-4">
           <p className="h-gs text-[1.4rem] tabular-nums"><span className="text-ice">0{idx}</span><span className="text-white/40"> / 0{SERVICES.length}</span></p>
           <div className="hidden h-[3px] w-40 overflow-hidden rounded-full bg-white/10 md:block"><div className="h-full w-full origin-left bg-ice transition-transform duration-500" style={{ transform: `scaleX(${idx / SERVICES.length})` }} /></div>
         </div>
       </div>
-      <p className="mt-3 px-[var(--m)] text-[0.85rem] text-white/45">Placeholder service areas. The final list is confirmed with Dr. Varney.</p>
+      <p data-reveal="0.1" className="mt-3 px-[var(--m)] text-[0.85rem] text-white/45">Placeholder service areas. The final list is confirmed with Dr. Varney.</p>
       <ul ref={track} className="mt-10 flex gap-6 overflow-x-auto px-[var(--m)] pb-4 [scrollbar-width:none] max-md:snap-x max-md:snap-mandatory md:w-max md:overflow-visible">
         {SERVICES.map((s, i) => (
-          <li key={s.t} className="on-color group relative h-[64svh] w-[82vw] shrink-0 overflow-hidden rounded-[2rem] ring-1 ring-white/10 max-md:snap-center md:w-[40vw] lg:w-[34vw]">
+          <li key={s.t} data-reveal={i * 0.1} className="on-color group relative h-[64svh] w-[82vw] shrink-0 overflow-hidden rounded-[2rem] ring-1 ring-white/10 max-md:snap-center md:w-[40vw] lg:w-[34vw]">
             <img src={s.img} alt="" className="sv-img absolute inset-0 h-full w-[124%] max-w-none object-cover transition-transform duration-700 group-hover:scale-105" style={{ left: '-12%' }} />
             <div className="absolute inset-0 bg-gradient-to-t from-navy/90 to-navy/10" />
             <span className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded-full bg-navy/70 transition-[color,background-color,opacity,transform] duration-500 group-hover:rotate-45 group-hover:bg-white group-hover:text-navy"><ArrowUpRight size={18} /></span>
