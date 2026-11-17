@@ -519,7 +519,6 @@ function Cta() {
           <div data-reveal="0.16"><p className="font-semibold text-white">Visit</p><p className="mt-2">Address placeholder<br />Florida, USA<br />Hours to be confirmed</p></div>
           <div data-reveal="0.24"><p className="font-semibold text-white">Contact</p><p className="mt-2">Phone and email to be supplied by the practice.</p></div>
         </div>
-        <p className="mt-10 text-[0.8rem] text-white/45">Concept 01 of 03, illustrative preview (not a live medical website). Credits: chest X-ray by Mikael Häggström (CC0, Wikimedia Commons), shown as a hologram; 3D elements built in code for this concept; photos from Unsplash (stock placeholders).</p>
       </footer>
     </section>
   );
