@@ -32,7 +32,7 @@ function bumpy(src, amp, freq, seed) {
 /* edge glow: violet at the bottom, ice at the top; works on plain and instanced meshes */
 function makeRim(k = 1.3) {
   return new THREE.ShaderMaterial({
-    uniforms: { c1: { value: new THREE.Color('#8BDFFF') }, c2: { value: new THREE.Color('#7557FF') }, k: { value: k } },
+    uniforms: { c1: { value: new THREE.Color('#A7ECCD') }, c2: { value: new THREE.Color('#1FA37A') }, k: { value: k } },
     vertexShader: `varying vec3 vN; varying vec3 vV; varying float vY;
       void main(){
         vec4 p = vec4(position, 1.0); vec3 nn = normal;
@@ -116,15 +116,15 @@ function Cell({ xray, scroll }) {
   return (
     <group ref={root}>
       <mesh ref={nucleus} geometry={nucGeo}>
-        <meshStandardMaterial color="#b9a8ff" emissive="#7557FF" emissiveIntensity={1} roughness={0.3} metalness={0.1} toneMapped={false} />
+        <meshStandardMaterial color="#9fe3c6" emissive="#1FA37A" emissiveIntensity={1} roughness={0.3} metalness={0.1} toneMapped={false} />
       </mesh>
-      <pointLight ref={light} color="#8f7bff" intensity={6} distance={6} decay={1.6} />
+      <pointLight ref={light} color="#5fd3a6" intensity={6} distance={6} decay={1.6} />
       <mesh geometry={coreGeo}>
-        <meshPhysicalMaterial ref={membrane} color="#b9c8ff" roughness={0.3} metalness={0.05} clearcoat={1} clearcoatRoughness={0.3} sheen={1} sheenColor="#8BDFFF" iridescence={0.6} transparent opacity={0.82} envMapIntensity={1.3} emissive="#2a1f8f" emissiveIntensity={0.25} depthWrite={false} />
+        <meshPhysicalMaterial ref={membrane} color="#c4f0dc" roughness={0.3} metalness={0.05} clearcoat={1} clearcoatRoughness={0.3} sheen={1} sheenColor="#A7ECCD" iridescence={0.6} transparent opacity={0.82} envMapIntensity={1.3} emissive="#0a5c40" emissiveIntensity={0.25} depthWrite={false} />
       </mesh>
       <mesh geometry={coreGeo} material={rimCore} scale={1.01} />
       <instancedMesh ref={blobs} args={[blobGeo, null, BLOBS]} frustumCulled={false}>
-        <meshPhysicalMaterial color="#c8d4ff" roughness={0.35} clearcoat={1} sheen={1} sheenColor="#8BDFFF" iridescence={0.5} envMapIntensity={1.3} emissive="#2a1f8f" emissiveIntensity={0.3} />
+        <meshPhysicalMaterial color="#d2f3e3" roughness={0.35} clearcoat={1} sheen={1} sheenColor="#A7ECCD" iridescence={0.5} envMapIntensity={1.3} emissive="#0a5c40" emissiveIntensity={0.3} />
       </instancedMesh>
       <instancedMesh ref={blobRim} args={[blobGeo, rimBlob, BLOBS]} frustumCulled={false} />
     </group>
@@ -154,8 +154,8 @@ function Orbit({ chips }) {
     <group ref={g}>
       {anchors.map((p, i) => (
         <group key={chips[i].t}>
-          <Line points={[p, p.clone().multiplyScalar(0.58)]} color="#8BDFFF" lineWidth={1.2} transparent opacity={0.55} />
-          <mesh position={p.clone().multiplyScalar(0.58)}><sphereGeometry args={[0.035, 12, 12]} /><meshBasicMaterial color="#8BDFFF" toneMapped={false} /></mesh>
+          <Line points={[p, p.clone().multiplyScalar(0.58)]} color="#A7ECCD" lineWidth={1.2} transparent opacity={0.55} />
+          <mesh position={p.clone().multiplyScalar(0.58)}><sphereGeometry args={[0.035, 12, 12]} /><meshBasicMaterial color="#A7ECCD" toneMapped={false} /></mesh>
           <Html position={p} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
             <div ref={(el) => { els.current[i] = el; }} className="w-[13.5rem] rounded-2xl bg-white/[0.08] px-4 py-3 text-white ring-1 ring-white/15 backdrop-blur-md" style={{ transform: 'translate(-50%,-50%)' }}>
               <p className="text-[0.95rem] font-semibold leading-tight">{chips[i].t}</p>
@@ -213,20 +213,20 @@ export default function CellCanvas({ className = '', xray, scroll = false, chips
         camera={{ fov, position: cam }}
         onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
       >
-        <ambientLight intensity={0.3} color="#8899ff" />
-        <directionalLight position={[-4, 5, 6]} intensity={1.6} color="#dff4ff" />
-        <directionalLight position={[5, -2, -3]} intensity={2.2} color="#7557FF" />
+        <ambientLight intensity={0.3} color="#9fe0c4" />
+        <directionalLight position={[-4, 5, 6]} intensity={1.6} color="#e8fbf2" />
+        <directionalLight position={[5, -2, -3]} intensity={2.2} color="#1FA37A" />
         <Suspense fallback={null}>
           <Environment resolution={256} frames={1}>
             <Lightformer form="rect" intensity={3} position={[0, 6, 3]} scale={[12, 3, 1]} color="#ffffff" />
-            <Lightformer form="rect" intensity={3} position={[-6, 1, 2]} scale={[6, 4, 1]} color="#8BDFFF" />
-            <Lightformer form="rect" intensity={4} position={[6, 0, -2]} scale={[6, 4, 1]} color="#7557FF" />
+            <Lightformer form="rect" intensity={3} position={[-6, 1, 2]} scale={[6, 4, 1]} color="#A7ECCD" />
+            <Lightformer form="rect" intensity={4} position={[6, 0, -2]} scale={[6, 4, 1]} color="#1FA37A" />
           </Environment>
           <group scale={scale}>
             <Pointer><Cell xray={xray} scroll={scroll} /></Pointer>
             {chips && !mobile && <Orbit chips={chips} />}
           </group>
-          <Sparkles count={mobile ? 30 : 70} scale={[7, 5, 5]} size={2.5} speed={0.25} opacity={0.7} color="#8BDFFF" />
+          <Sparkles count={mobile ? 30 : 70} scale={[7, 5, 5]} size={2.5} speed={0.25} opacity={0.7} color="#A7ECCD" />
         </Suspense>
       </Canvas>
     </div>

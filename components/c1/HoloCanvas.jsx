@@ -8,8 +8,8 @@ import { S } from '@/lib/c1/state';
 
 const damp = THREE.MathUtils.damp;
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-const ICE = new THREE.Color('#8BDFFF');
-const VIOLET = new THREE.Color('#7557FF');
+const ICE = new THREE.Color('#A6F2D6');
+const VIOLET = new THREE.Color('#2FA37A');
 
 /* torso silhouette [radius, y], pelvis to neck */
 const PROFILE = [[0.78, -1.6], [0.86, -1.2], [0.8, -0.8], [0.66, -0.35], [0.68, 0.0], [0.82, 0.45], [0.98, 0.9], [1.12, 1.3], [1.16, 1.55], [0.92, 1.76], [0.5, 1.88], [0.3, 1.98], [0.27, 2.25]];
@@ -136,8 +136,8 @@ function Torso({ xray }) {
   }, [pts, R]);
 
   const m = useMemo(() => ({
-    shellRim: rim(1.5), shellFill: glowMat('#3b6fd6', 0.05), lines: new THREE.LineBasicMaterial({ color: '#8BDFFF', transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false }),
-    bone: glowMat('#9fe4ff', 0.55), spine: glowMat('#e9fbff', 0.8), armRim: rim(1.2, 2.0), organRim: rim(1.6, 1.8), organFill: glowMat('#4aa8ff', 0.18), heart: glowMat('#9d8bff', 0.95),
+    shellRim: rim(1.5), shellFill: glowMat('#2f9e78', 0.05), lines: new THREE.LineBasicMaterial({ color: '#A6F2D6', transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false }),
+    bone: glowMat('#b4f5dc', 0.55), spine: glowMat('#e9fbff', 0.8), armRim: rim(1.2, 2.0), organRim: rim(1.6, 1.8), organFill: glowMat('#4fd1a0', 0.18), heart: glowMat('#7fe0bf', 0.95),
   }), []);
   mats.current = m;
 
@@ -179,7 +179,7 @@ function Torso({ xray }) {
       {g.bones.map((a, i) => <mesh key={`b${i}`} geometry={a} material={m.bone} />)}
       <mesh ref={scan} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.0, 1.08, 96]} />
-        <meshBasicMaterial color="#8BDFFF" transparent opacity={0.5} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} toneMapped={false} />
+        <meshBasicMaterial color="#A6F2D6" transparent opacity={0.5} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} toneMapped={false} />
       </mesh>
     </group>
   );
@@ -226,7 +226,7 @@ export default function HoloCanvas({ className = '', xray, cam = [0, 0.3, 8], fo
         <Suspense fallback={null}>
           <Pointer><Torso xray={xray} /></Pointer>
           <Ready />
-          <Sparkles count={mobile ? 40 : 110} scale={[7, 6, 4]} position={[0, 0.3, 0]} size={2.4} speed={0.3} opacity={0.8} color="#8BDFFF" />
+          <Sparkles count={mobile ? 40 : 110} scale={[7, 6, 4]} position={[0, 0.3, 0]} size={2.4} speed={0.3} opacity={0.8} color="#A6F2D6" />
         </Suspense>
       </Canvas>
     </div>

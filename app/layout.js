@@ -17,6 +17,8 @@ export default function RootLayout({ children }) {
         <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet" />
         <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
         <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600&display=swap" rel="stylesheet" />
       </head>
       <body>{children}</body>
     </html>

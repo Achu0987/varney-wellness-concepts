@@ -104,7 +104,7 @@ function Head({ active, onPick, overlay }) {
       {/* a soft scanning band that sweeps the face */}
       <mesh ref={scan} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.62, 0.66, 96]} />
-        <meshBasicMaterial color="#8BDFFF" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} toneMapped={false} />
+        <meshBasicMaterial color="#7fe0bf" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} toneMapped={false} />
       </mesh>
       {points.map((p, i) => (
         <Html key={ZONES[i].key} position={p} center occlude={[mesh]} zIndexRange={[20, 0]}>
@@ -113,7 +113,7 @@ function Head({ active, onPick, overlay }) {
             className={`relative grid place-items-center rounded-full transition-all duration-500 ${i === active ? 'h-9 w-9' : 'h-6 w-6'}`}
           >
             <span className={`absolute inset-0 rounded-full ${i === active ? 'animate-ping bg-ice/50' : 'bg-white/20'}`} />
-            <span className={`relative rounded-full ring-2 ring-white ${i === active ? 'h-4 w-4 bg-ice shadow-[0_0_20px_#8BDFFF]' : 'h-2.5 w-2.5 bg-violet'}`} />
+            <span className={`relative rounded-full ring-2 ring-white ${i === active ? 'h-4 w-4 bg-ice' : 'h-2.5 w-2.5 bg-violet'}`} />
           </button>
         </Html>
       ))}
@@ -142,13 +142,13 @@ export default function TreatmentScene({ active, onPick, overlay }) {
       >
         <ambientLight intensity={0.45} />
         <directionalLight position={[-2.5, 4, 5]} intensity={2.2} color="#fff4ea" />
-        <directionalLight position={[3.5, 2, -2]} intensity={2.4} color="#8BDFFF" />
-        <directionalLight position={[-4, 1, -3]} intensity={1.8} color="#7557FF" />
+        <directionalLight position={[3.5, 2, -2]} intensity={2.4} color="#d6f5e8" />
+        <directionalLight position={[-4, 1, -3]} intensity={1.4} color="#d9efe5" />
         <Suspense fallback={null}>
           <Environment resolution={256} frames={1}>
             <Lightformer form="rect" intensity={3} position={[0, 6, 4]} scale={[10, 3, 1]} color="#ffffff" />
             <Lightformer form="rect" intensity={2} position={[-6, 3, 2]} scale={[5, 4, 1]} color="#dff4ff" />
-            <Lightformer form="rect" intensity={2.5} position={[6, 2, -2]} scale={[5, 4, 1]} color="#b9a8ff" />
+            <Lightformer form="rect" intensity={2.5} position={[6, 2, -2]} scale={[5, 4, 1]} color="#e6f4ee" />
           </Environment>
           <Head active={active} onPick={onPick} overlay={overlay} />
         </Suspense>

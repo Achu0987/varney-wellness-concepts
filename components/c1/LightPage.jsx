@@ -14,6 +14,7 @@ import Loader from './Loader';
 import * as Sec from './Sections';
 import PartyInvite from './PartyInvite';
 import Treatment from './Treatment';
+import FloatDock from './FloatDock';
 
 gsap.registerPlugin(ScrollTrigger);
 const HoloCanvas = dynamic(() => import('./HoloCanvas'), { ssr: false });
@@ -43,9 +44,9 @@ function toast(msg) { window.dispatchEvent(new CustomEvent('vw-toast', { detail:
 function Pill({ href = '#contact', children, ghost = false, onClick }) {
   const cls = ghost
     ? 'bg-white/[0.07] text-white ring-1 ring-white/25 hover:bg-white/15'
-    : 'bg-white text-navy shadow-[0_10px_30px_-12px_rgba(8,14,32,0.35)] hover:shadow-[0_14px_36px_-12px_rgba(117,87,255,0.55)]';
+    : 'bg-white text-navy shadow-[0_10px_30px_-12px_rgba(8,14,32,0.35)]';
   return (
-    <a href={href} onClick={onClick || ((e) => go(e, href))} className={`group inline-flex h-12 items-center gap-3 rounded-full pl-1.5 pr-5 text-[0.95rem] font-semibold transition-all duration-300 ${cls}`}>
+    <a href={href} onClick={onClick || ((e) => go(e, href))} className={`group inline-flex h-12 items-center gap-3 rounded-full pl-1.5 pr-5 text-[0.95rem] font-semibold transition-[color,background-color,opacity,transform] duration-300 ${cls}`}>
       <span className={`grid h-9 w-9 place-items-center rounded-full transition-transform duration-300 group-hover:rotate-45 ${ghost ? 'bg-white text-violet' : 'bg-violet text-white'}`}><ArrowUpRight size={17} /></span>
       {children}
     </a>
@@ -95,13 +96,13 @@ function Toast() {
 /* ------------------------------------------------------------------ HUD panels around the hologram */
 function Hud({ className, title, kind }) {
   return (
-    <div className={`absolute z-20 hidden w-[12.5rem] rounded-xl bg-[#0b1840]/55 p-3 text-white ring-1 ring-ice/40 backdrop-blur-sm xl:block ${className}`}>
-      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ice">{title}</p>
+    <div className={`absolute z-20 hidden w-[12.5rem] rounded-xl bg-navy p-3 text-white ring-1 ring-ice/25 xl:block ${className}`}>
+      <p className="text-[0.72rem] font-semibold text-ice">{title}</p>
       <svg viewBox="0 0 180 44" className="mt-2 h-11 w-full" aria-hidden="true">
-        {kind === 'pulse' && <path className="hud-line" d="M0 26 H40 L48 10 L56 38 L64 18 L70 26 H110 L118 6 L126 40 L134 26 H180" fill="none" stroke="#8BDFFF" strokeWidth="1.8" />}
-        {kind === 'bars' && [8, 18, 12, 26, 20, 32, 24, 36, 28].map((h, i) => <rect key={i} x={i * 20 + 2} y={44 - h} width="12" height={h} rx="2" fill={i === 7 ? '#8BDFFF' : 'rgba(139,223,255,0.35)'} />)}
-        {kind === 'ring' && (<><circle cx="22" cy="22" r="17" fill="none" stroke="rgba(139,223,255,0.25)" strokeWidth="4" /><circle className="hud-ring" cx="22" cy="22" r="17" fill="none" stroke="#8BDFFF" strokeWidth="4" strokeDasharray="107" strokeDashoffset="30" transform="rotate(-90 22 22)" /><rect x="52" y="12" width="120" height="5" rx="2" fill="rgba(139,223,255,0.5)" /><rect x="52" y="24" width="90" height="5" rx="2" fill="rgba(139,223,255,0.3)" /></>)}
-        {kind === 'wave' && <path className="hud-line" d="M0 22 C 20 2, 40 42, 60 22 S 100 2, 120 22 S 160 42, 180 22" fill="none" stroke="#8BDFFF" strokeWidth="1.8" />}
+        {kind === 'pulse' && <path className="hud-line" d="M0 26 H40 L48 10 L56 38 L64 18 L70 26 H110 L118 6 L126 40 L134 26 H180" fill="none" stroke="#A7ECCD" strokeWidth="1.8" />}
+        {kind === 'bars' && [8, 18, 12, 26, 20, 32, 24, 36, 28].map((h, i) => <rect key={i} x={i * 20 + 2} y={44 - h} width="12" height={h} rx="2" fill={i === 7 ? '#A7ECCD' : 'rgba(167,236,205,0.35)'} />)}
+        {kind === 'ring' && (<><circle cx="22" cy="22" r="17" fill="none" stroke="rgba(167,236,205,0.25)" strokeWidth="4" /><circle className="hud-ring" cx="22" cy="22" r="17" fill="none" stroke="#A7ECCD" strokeWidth="4" strokeDasharray="107" strokeDashoffset="30" transform="rotate(-90 22 22)" /><rect x="52" y="12" width="120" height="5" rx="2" fill="rgba(167,236,205,0.5)" /><rect x="52" y="24" width="90" height="5" rx="2" fill="rgba(167,236,205,0.3)" /></>)}
+        {kind === 'wave' && <path className="hud-line" d="M0 22 C 20 2, 40 42, 60 22 S 100 2, 120 22 S 160 42, 180 22" fill="none" stroke="#A7ECCD" strokeWidth="1.8" />}
       </svg>
     </div>
   );
@@ -110,18 +111,45 @@ function Hud({ className, title, kind }) {
 /* ------------------------------------------------------------------ hero */
 function Hero({ ready, brandOn }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const heroRef = useRef(null);
+  // scroll story: the clear doctor photo first, then the hologram and its panels take over
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const ctx = gsap.context(() => {
+      const build = (st) => gsap.timeline({ scrollTrigger: st })
+        .fromTo('.hero-clear', { opacity: 1 }, { opacity: 0, ease: 'none' }, 0)
+        .fromTo('.hero-scrim', { opacity: 1 }, { opacity: 0, ease: 'none' }, 0)
+        .fromTo('.hero-holo', { opacity: 0, yPercent: 22, scale: 0.88 }, { opacity: 1, yPercent: 0, scale: 1, ease: 'power2.out' }, 0.1)
+        .fromTo('.hero-hud', { opacity: 0, y: 40, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, stagger: 0.08, ease: 'power2.out' }, 0.45)
+        .fromTo('.hero-cap', { opacity: 0 }, { opacity: 1, ease: 'none' }, 0.7);
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 768px)', () => { build({ trigger: heroRef.current, start: 'top top', end: '+=110%', scrub: 0.7, pin: true }); });
+      mm.add('(max-width: 767px)', () => { build({ trigger: heroRef.current, start: 'top top', end: 'bottom 35%', scrub: 0.7 }); });
+    }, heroRef);
+    return () => ctx.revert();
+  }, []);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 24);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
   return (
-    <section id="top" className="p-2.5 md:p-4">
-      <div className="relative flex min-h-[min(calc(100svh-2rem),900px)] flex-col overflow-hidden rounded-[1.75rem] bg-[linear-gradient(135deg,#7557FF_0%,#6f8dff_55%,#8BDFFF_120%)] md:rounded-[2.25rem]">
+    <section id="top" ref={heroRef} className="p-2.5 md:p-4">
+      <div className="relative flex min-h-[min(calc(100svh-2rem),900px)] flex-col overflow-hidden rounded-[1.75rem] bg-violet-deep md:rounded-[2.25rem]">
         {/* real doctor photo behind the hologram (stock placeholder) */}
-        <img src="/images/doc.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover object-[50%_30%] opacity-30 blur-[2px] mix-blend-luminosity" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_42%_48%_at_50%_64%,rgba(8,14,32,0.6)_0%,rgba(8,14,32,0.25)_55%,rgba(8,14,32,0)_100%)]" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(117,87,255,0.55),rgba(111,141,255,0.35)_55%,rgba(139,223,255,0.45)_120%)]" />
-        {/* nav */}
-        <header className="relative z-30 flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
+        <img src="/images/doc.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover object-[50%_30%] opacity-[0.18] blur-[2px] mix-blend-luminosity" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-navy/30" />
+        {/* the same photo, clear and in colour, on arrival */}
+        <img src="/images/doc.jpg" alt="" aria-hidden="true" className="hero-clear pointer-events-none absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
+        <div aria-hidden="true" className="hero-scrim pointer-events-none absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/10 to-navy/85" />
+        {/* nav: fixed to the viewport; over the hero it sits in the green, once scrolled it becomes a white bar */}
+        <div aria-hidden="true" className="h-[88px] shrink-0 md:h-[104px]" />
+        <header className={`fixed inset-x-2.5 top-2.5 z-[60] flex items-center justify-between px-5 py-5 transition-[background-color,box-shadow] duration-500 md:inset-x-4 md:top-4 md:px-10 ${scrolled ? 'on-light rounded-full bg-paper py-2.5 shadow-[0_18px_40px_-24px_rgb(var(--c-ink)/0.45)] ring-1 ring-white/10 md:py-3' : 'md:py-7'}`}>
           <a href="#top" data-brand onClick={(e) => go(e, '#top')} style={{ opacity: brandOn ? 1 : 0 }} className="h-gs text-[1.3rem] text-white md:text-[1.5rem]">Varney <span className="text-ice">Wellness</span></a>
           <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-1 rounded-full bg-white/[0.06] p-1.5 backdrop-blur-md ring-1 ring-white/10">
+            <ul className="flex items-center gap-1 rounded-full bg-white/[0.06] p-1.5 ring-1 ring-white/10">
               {LINKS.map(([l, h]) => (
                 <li key={h}><a href={h} onClick={(e) => go(e, h)} className="block rounded-full px-4 py-2 text-[0.95rem] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">{l}</a></li>
               ))}
@@ -133,14 +161,14 @@ function Hero({ ready, brandOn }) {
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
+          <AnimatePresence>
+            {open && (
+              <motion.ul initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="on-light absolute inset-x-0 top-[calc(100%+0.5rem)] z-40 grid gap-1 rounded-3xl bg-paper p-3 text-white shadow-2xl ring-1 ring-white/10 lg:hidden">
+                {LINKS.map(([l, h]) => <li key={h}><a href={h} onClick={(e) => { setOpen(false); go(e, h); }} className="block rounded-2xl px-4 py-3 text-[1.05rem] font-medium hover:bg-navy-3">{l}</a></li>)}
+              </motion.ul>
+            )}
+          </AnimatePresence>
         </header>
-        <AnimatePresence>
-          {open && (
-            <motion.ul initial={{ opacity: 0, y: -10 }} animate={ready ? { opacity: 1, y: 0 } : undefined} exit={{ opacity: 0, y: -10 }} className="absolute inset-x-4 top-20 z-40 grid gap-1 rounded-3xl bg-white p-3 text-navy shadow-2xl lg:hidden">
-              {LINKS.map(([l, h]) => <li key={h}><a href={h} onClick={(e) => { setOpen(false); go(e, h); }} className="block rounded-2xl px-4 py-3 text-[1.05rem] font-medium hover:bg-[#EEF7FF]">{l}</a></li>)}
-            </motion.ul>
-          )}
-        </AnimatePresence>
 
         {/* giant headline behind the person */}
         <motion.h1
@@ -153,17 +181,17 @@ function Hero({ ready, brandOn }) {
         {/* the real human, in front of the headline */}
         <div className="relative z-20 mx-auto -mt-2 h-[46svh] w-full max-w-[560px] md:absolute md:bottom-0 md:left-1/2 md:top-[19%] md:mt-0 md:h-auto md:w-[72vw] md:max-w-none md:-translate-x-1/2">
           <motion.div initial={{ opacity: 0, y: 60 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ duration: 1.4, ease, delay: 0.35 }} className="h-full w-full">
-            <HoloCanvas className="h-full w-full" xray={0} cam={[0, 0.55, 9.1]} look={0.72} />
+            <div className="hero-holo h-full w-full"><HoloCanvas className="h-full w-full" xray={0} cam={[0, 0.55, 9.1]} look={0.72} /></div>
           </motion.div>
         </div>
 
-        <Hud className="left-[30%] top-[35%]" title="Your care plan" kind="bars" />
-        <Hud className="left-[33%] top-[68%]" title="Check-ins" kind="pulse" />
-        <Hud className="right-[24%] top-[32%]" title="Wellbeing overview" kind="ring" />
-        <Hud className="right-[22%] top-[61%]" title="Follow-up" kind="wave" />
-        <p className="absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 text-[0.75rem] text-white/70 md:block">Background photo: stock placeholder. Panels are illustrative, not patient data.</p>
+        <Hud className="hero-hud left-[30%] top-[35%]" title="Your care plan" kind="bars" />
+        <Hud className="hero-hud left-[33%] top-[68%]" title="Check-ins" kind="pulse" />
+        <Hud className="hero-hud right-[24%] top-[32%]" title="Wellbeing overview" kind="ring" />
+        <Hud className="hero-hud right-[22%] top-[61%]" title="Follow-up" kind="wave" />
+        <p className="hero-cap absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 text-[0.75rem] text-white/70 md:block">Background photo: stock placeholder. Panels are illustrative, not patient data.</p>
         {/* left copy */}
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ duration: 1, ease, delay: 0.8 }} className="relative z-30 px-5 pb-6 md:absolute md:left-10 md:top-[48%] md:max-w-[24rem] md:rounded-3xl md:bg-navy/35 md:p-5 md:backdrop-blur-md md:ring-1 md:ring-white/10">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ duration: 1, ease, delay: 0.8 }} className="relative z-30 px-5 pb-6 md:absolute md:left-10 md:top-[48%] md:max-w-[24rem] md:rounded-3xl md:bg-navy md:p-5 md:ring-1 md:ring-white/10">
           <div className="flex gap-4">
             <ArrowRight className="mt-1 hidden shrink-0 text-ice md:block" size={22} />
             <p className="text-[1.05rem] leading-relaxed text-white/75">
@@ -179,13 +207,13 @@ function Hero({ ready, brandOn }) {
         
 
         {/* doctor chip */}
-        <motion.div initial={{ opacity: 0 }} animate={ready ? { opacity: 1 } : undefined} transition={{ delay: 1.2, duration: 1 }} className="relative z-30 mx-5 mb-5 flex items-center gap-3 self-start rounded-full bg-white/[0.07] py-2 pl-2 pr-5 backdrop-blur-md ring-1 ring-white/15 md:absolute md:bottom-8 md:left-10 md:m-0">
+        <motion.div initial={{ opacity: 0 }} animate={ready ? { opacity: 1 } : undefined} transition={{ delay: 1.2, duration: 1 }} className="relative z-30 mx-5 mb-5 flex items-center gap-3 self-start rounded-full bg-navy py-2 pl-2 pr-5 ring-1 ring-white/10 md:absolute md:bottom-8 md:left-10 md:m-0">
           <span className="grid h-10 w-10 place-items-center rounded-full bg-violet text-[0.85rem] font-bold text-white">JV</span>
           <span className="text-[0.9rem] leading-tight text-white"><b>Led by Dr. Joseph Varney, MD</b><br /><span className="text-white/60">Florida, USA</span></span>
         </motion.div>
 
         <a href="#about" onClick={(e) => go(e, '#about')} className="absolute bottom-8 right-10 z-30 hidden items-center gap-2 text-[0.9rem] font-medium text-white md:flex">
-          Scroll to see how it works <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-navy"><ArrowDown size={16} className="animate-bounce" /></span>
+          Scroll to see how it works <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-navy"><ArrowDown size={16} /></span>
         </a>
       </div>
     </section>
@@ -221,7 +249,7 @@ function Why() {
               </Reveal>
             ))}
           </div>
-          <p className="mt-4 text-[0.85rem] text-white/45">Illustrative copy, pending the practice's approval.</p>
+          <p className="mt-4 text-[0.85rem] text-white/45">Illustrative copy, pending the practice’s approval.</p>
         </div>
       </div>
     </section>
@@ -236,7 +264,7 @@ function How() {
     [CalendarCheck, 'Follow through', 'Check-ins and updates that keep everything connected over time.'],
   ];
   return (
-    <section id="how" className="bg-[#0B1229] px-[var(--m)] py-24 md:py-32">
+    <section id="how" className="bg-navy-2 px-[var(--m)] py-24 md:py-32">
       <div className="mx-auto max-w-[1320px]">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <Reveal><Label>How it works</Label></Reveal>
@@ -245,13 +273,13 @@ function How() {
         <div className="mt-14 grid gap-5 md:grid-cols-[1fr_1.3fr]">
           <Reveal className="relative min-h-[22rem] overflow-hidden rounded-[1.8rem]">
             <img src="/images/band.jpg" alt="Bright, calm clinic interior with plants (stock photo placeholder)" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,14,32,0)_50%,rgba(8,14,32,0.65))]" />
-            <p className="absolute bottom-5 left-5 rounded-full bg-white/85 px-4 py-2 text-[0.85rem] font-medium text-navy backdrop-blur">Stock photo placeholder</p>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy/65" />
+            <p className="absolute bottom-5 left-5 rounded-full bg-white/85 px-4 py-2 text-[0.85rem] font-medium text-navy">Stock photo placeholder</p>
           </Reveal>
           <ol className="grid gap-4">
             {steps.map(([Icon, t, b], i) => (
               <Reveal key={t} delay={i * 0.1}>
-                <li className={`flex items-start justify-between gap-6 rounded-[1.6rem] p-6 transition-all duration-500 ${i === 1 ? 'bg-violet text-white shadow-[0_30px_60px_-30px_rgba(117,87,255,0.8)] md:-translate-x-8' : 'bg-white/[0.04] ring-1 ring-white/10'}`}>
+                <li className={`flex items-start justify-between gap-6 rounded-[1.6rem] p-6 transition-[color,background-color,opacity,transform] duration-500 ${i === 1 ? 'bg-violet text-white md:-translate-x-8' : 'bg-white/[0.04] ring-1 ring-white/10'}`}>
                   <div className="flex gap-4">
                     <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${i === 1 ? 'bg-white text-violet' : 'bg-violet/20 text-ice'}`}><Icon size={22} /></span>
                     <div><h3 className="h-gs text-[1.3rem]">{t}</h3><p className={`mt-1.5 ${i === 1 ? 'text-white/75' : 'text-white/65'}`}>{b}</p></div>
@@ -296,7 +324,7 @@ function Story() {
           <h2 className="h-gs mt-6 text-[clamp(2rem,4.2vw,4rem)] leading-[1.02]">Look beneath<br />the surface.</h2>
           <p className="mt-4 max-w-[40ch] text-white/65">Keep scrolling: the hologram fades from the outer body to the structure and organs within. It is how we think about care: the whole person, from the outside in.</p>
           <div className="mt-8 flex gap-2">
-            {LAYERS.map(([n], i) => <span key={n} className={`rounded-full px-4 py-2 text-[0.9rem] font-semibold transition-all duration-500 ${i === idx ? 'bg-violet text-white' : 'bg-white/[0.05] text-white/50 ring-1 ring-white/10'}`}>{n}</span>)}
+            {LAYERS.map(([n], i) => <span key={n} className={`rounded-full px-4 py-2 text-[0.9rem] font-semibold transition-[color,background-color,opacity,transform] duration-500 ${i === idx ? 'bg-violet text-white' : 'bg-white/[0.05] text-white/50 ring-1 ring-white/10'}`}>{n}</span>)}
           </div>
           <div className="mt-6 min-h-[7rem]">
             <AnimatePresence mode="wait">
@@ -308,7 +336,6 @@ function Story() {
           </div>
         </div>
         <div className="relative h-[52svh] max-md:order-1 md:h-[86svh]">
-          <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(117,87,255,0.35),rgba(117,87,255,0)_70%)]" />
           <HoloCanvas className="relative h-full w-full" cam={[0, 0.3, 8.2]} />
         </div>
       </div>
@@ -338,7 +365,7 @@ function Services() {
               <article className="group flex h-full flex-col rounded-[1.6rem] p-5 ring-1 ring-white/10 transition-transform duration-500 hover:-translate-y-2" style={{ background: bg }}>
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="h-gs text-[1.3rem] leading-tight">{t}</h3>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-navy ring-1 ring-[#e3ecf5] transition-all duration-300 group-hover:rotate-45 group-hover:bg-violet group-hover:text-white"><ArrowUpRight size={16} /></span>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-navy ring-1 ring-cool/30 transition-[color,background-color,opacity,transform] duration-300 group-hover:rotate-45 group-hover:bg-violet group-hover:text-white"><ArrowUpRight size={16} /></span>
                 </div>
                 <p className="mt-2 text-[0.92rem] text-white/60">Placeholder description of this area of care.</p>
                 <div className="mt-5 aspect-[4/3] overflow-hidden rounded-2xl">
@@ -364,7 +391,7 @@ function Party() {
   const [v, setV] = useState(0);
   const stepNames = ['Occasion', 'Guests', 'Setting'];
   return (
-    <section id="party" className="bg-[#0B1229] px-[var(--m)] py-24 md:py-32">
+    <section id="party" className="bg-navy-2 px-[var(--m)] py-24 md:py-32">
       <div className="mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
         <div>
           <Reveal><Label>Private Botox Parties</Label></Reveal>
@@ -390,7 +417,7 @@ function Party() {
                   <legend className="h-gs text-[1.6rem]">What are we celebrating?</legend>
                   <div className="mt-4 grid grid-cols-2 gap-3" role="radiogroup">
                     {OCC.map(([t, Icon], i) => (
-                      <button key={t} type="button" role="radio" aria-checked={occ === i} onClick={() => setOcc(i)} className={`flex min-h-[5.5rem] flex-col justify-between rounded-2xl p-4 text-left font-semibold transition-all duration-300 ${occ === i ? 'bg-violet text-white shadow-[0_14px_30px_-12px_rgba(117,87,255,0.7)]' : 'bg-white/[0.06] hover:-translate-y-0.5'}`}>
+                      <button key={t} type="button" role="radio" aria-checked={occ === i} onClick={() => setOcc(i)} className={`flex min-h-[5.5rem] flex-col justify-between rounded-2xl p-4 text-left font-semibold transition-[color,background-color,opacity,transform] duration-300 ${occ === i ? 'bg-violet text-white' : 'bg-white/[0.06] hover:-translate-y-0.5'}`}>
                         <Icon size={20} className={occ === i ? 'text-white' : 'text-violet'} />{t}
                       </button>
                     ))}
@@ -400,7 +427,7 @@ function Party() {
                   <legend className="h-gs text-[1.6rem]">How many guests?</legend>
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4" role="radiogroup">
                     {GUESTS.map((t, i) => (
-                      <button key={t} type="button" role="radio" aria-checked={g === i} onClick={() => setG(i)} className={`flex min-h-[7rem] flex-col items-center justify-center gap-2 rounded-2xl font-semibold transition-all duration-300 ${g === i ? 'bg-ice text-navy' : 'bg-white/[0.06]'}`}>
+                      <button key={t} type="button" role="radio" aria-checked={g === i} onClick={() => setG(i)} className={`flex min-h-[7rem] flex-col items-center justify-center gap-2 rounded-2xl font-semibold transition-[color,background-color,opacity,transform] duration-300 ${g === i ? 'bg-ice text-navy' : 'bg-white/[0.06]'}`}>
                         <span className="flex flex-wrap justify-center gap-1 px-3">{Array.from({ length: [5, 8, 12, 16][i] }).map((_, k) => <i key={k} className={`h-2 w-2 rounded-full ${g === i ? 'bg-navy' : 'bg-violet/60'}`} />)}</span>
                         <span className="h-gs text-[1.3rem]">{t}</span>
                       </button>
@@ -412,7 +439,7 @@ function Party() {
                   <legend className="h-gs text-[1.6rem]">Where would you like it?</legend>
                   <div className="mt-4 grid gap-3 sm:grid-cols-3" role="radiogroup">
                     {VENUES.map(([t, s, Icon], i) => (
-                      <button key={t} type="button" role="radio" aria-checked={v === i} onClick={() => setV(i)} className={`flex min-h-[8rem] flex-col justify-between rounded-[1.4rem] rounded-t-[4rem] p-4 text-left font-semibold transition-all duration-300 ${v === i ? 'bg-violet text-white' : 'bg-white/[0.06]'}`}>
+                      <button key={t} type="button" role="radio" aria-checked={v === i} onClick={() => setV(i)} className={`flex min-h-[8rem] flex-col justify-between rounded-[1.4rem] rounded-t-[4rem] p-4 text-left font-semibold transition-[color,background-color,opacity,transform] duration-300 ${v === i ? 'bg-violet text-white' : 'bg-white/[0.06]'}`}>
                         <Icon size={20} className={v === i ? 'text-ice' : 'text-violet'} /><span>{t}<br /><span className="text-[0.82rem] font-medium opacity-70">{s}</span></span>
                       </button>
                     ))}
@@ -423,7 +450,7 @@ function Party() {
           </div>
 
           <div className="rounded-2xl bg-navy/70 p-5 ring-1 ring-white/10" aria-live="polite">
-            <p className="text-[0.82rem] font-bold uppercase tracking-[0.12em] text-ice">Your private Varney experience</p>
+            <p className="text-[0.82rem] font-bold text-ice">Your private Varney experience</p>
             <dl className="mt-3 grid grid-cols-2 gap-3 text-[0.95rem] sm:grid-cols-4">
               <div><dt className="text-white/45">Occasion</dt><dd className="font-semibold">{OCC[occ][0]}</dd></div>
               <div><dt className="text-white/45">Guests</dt><dd className="font-semibold">{GUESTS[g]}</dd></div>
@@ -432,7 +459,7 @@ function Party() {
             </dl>
           </div>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <p className="max-w-[34ch] text-[0.8rem] text-white/55">Event inquiry only. Treatment eligibility, assessment, consent, supervision and venue suitability remain subject to the practice's approval.</p>
+            <p className="max-w-[34ch] text-[0.8rem] text-white/55">Event inquiry only. Treatment eligibility, assessment, consent, supervision and venue suitability remain subject to the practice’s approval.</p>
             {step < 2
               ? <button type="button" onClick={() => setStep(step + 1)} className="inline-flex h-12 items-center gap-2 rounded-full bg-violet px-6 font-semibold text-white">Next <ArrowRight size={17} /></button>
               : <button type="button" onClick={() => toast('Preview only: nothing was sent or booked.')} className="inline-flex h-12 items-center gap-2 rounded-full bg-violet px-6 font-semibold text-white">Send inquiry <ArrowUpRight size={17} /></button>}
@@ -449,10 +476,10 @@ function Doctor() {
     <section id="doctor" className="px-[var(--m)] py-24 md:py-32">
       <div className="mx-auto grid max-w-[1320px] items-center gap-10 md:grid-cols-[0.9fr_1.1fr] md:gap-16">
         <Reveal className="relative">
-          <div className="overflow-hidden rounded-[2rem] rounded-t-[12rem] bg-[#1C1752]">
+          <div className="overflow-hidden rounded-[2rem] rounded-t-[12rem] bg-violet-deep">
             <motion.img initial={{ scale: 1.15 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease }} src="/images/doc.jpg" alt="Stock portrait placeholder (not Dr. Varney)" className="aspect-[4/5] w-full object-cover object-[50%_20%]" />
           </div>
-          <p className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-2 text-[0.85rem] font-medium text-navy backdrop-blur">Stock placeholder, not Dr. Varney</p>
+          <p className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-2 text-[0.85rem] font-medium text-navy">Stock placeholder, not Dr. Varney</p>
         </Reveal>
         <div>
           <Reveal><Label>Meet your doctor</Label></Reveal>
@@ -470,7 +497,7 @@ function Doctor() {
 function Cta() {
   return (
     <section id="contact" className="px-2.5 pb-4 md:px-4">
-      <div className="relative overflow-hidden rounded-[1.75rem] bg-[linear-gradient(135deg,#7557FF_0%,#6f8dff_55%,#8BDFFF_120%)] px-6 py-16 text-white md:rounded-[2.25rem] md:px-14 md:py-24">
+      <div className="on-color relative overflow-hidden rounded-[1.75rem] bg-violet px-6 py-16 text-white md:rounded-[2.25rem] md:px-14 md:py-24">
         <div className="relative z-10 max-w-[38rem]">
           <h2 className="h-gs text-[clamp(2.2rem,4.6vw,4.4rem)] leading-[1.02]">Your next chapter starts here.</h2>
           <p className="mt-5 text-[1.15rem] text-white/85">Discover a more personal approach to wellness.</p>
@@ -503,9 +530,9 @@ export default function LightPage() {
   const [ready, setReady] = useState(false);
   const [landed, setLanded] = useState(false);
   useEffect(() => {
-    document.documentElement.style.background = '#080E20';
-    document.body.style.background = '#080E20';
-    document.body.style.color = '#ffffff';
+    document.documentElement.style.background = '#F5F9F7';
+    document.body.style.background = '#F5F9F7';
+    document.body.style.color = '#0F2822';
     S.xray = 0; S.rot = 0;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let lenis; let tick;
@@ -537,6 +564,7 @@ export default function LightPage() {
         <Sec.Doctor />
       </main>
       <Cta />
+      <FloatDock />
       <Toast />
     </div>
   );

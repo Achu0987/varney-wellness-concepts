@@ -103,7 +103,7 @@ export default function Loader({ onReady, onLanded }) {
           role="status"
           aria-live="polite"
           aria-label={stage === 'scan' ? `Loading ${pct}%` : 'Varney Wellness'}
-          className={`fixed inset-0 z-[200] overflow-hidden ${stage === 'out' ? 'pointer-events-none' : ''}`}
+          className={`on-color fixed inset-0 z-[200] overflow-hidden ${stage === 'out' ? 'pointer-events-none' : ''}`}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
@@ -111,7 +111,7 @@ export default function Loader({ onReady, onLanded }) {
           {/* beat 2 background: the hero's own gradient blooms in, then gives way to the real hero */}
           <motion.div
             aria-hidden="true"
-            className="absolute inset-0 bg-[linear-gradient(135deg,#7557FF_0%,#6f8dff_55%,#8BDFFF_120%)]"
+            className="absolute inset-0 bg-violet"
             initial={{ opacity: 1 }}
             animate={{ opacity: stage === 'out' ? 0 : 1 }}
             transition={{ duration: stage === 'out' ? 1 : 1.1, ease }}
