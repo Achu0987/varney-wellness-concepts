@@ -108,10 +108,47 @@ function Hud({ className, title, kind }) {
   );
 }
 
-/* ------------------------------------------------------------------ hero */
-function Hero({ ready, brandOn }) {
+/* ------------------------------------------------------------------ header
+   Lives outside the hero: the hero is pinned (transformed) while it plays, and a fixed
+   element inside a transformed parent would scroll away with it. */
+function SiteHeader({ brandOn }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 24);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+  return (
+    <header className={`fixed inset-x-2.5 top-2.5 z-[60] flex items-center justify-between px-5 py-5 transition-[background-color,box-shadow] duration-500 md:inset-x-4 md:top-4 md:px-10 ${scrolled ? 'on-light rounded-full bg-paper py-2.5 shadow-[0_18px_40px_-24px_rgb(var(--c-ink)/0.45)] ring-1 ring-white/10 md:py-3' : 'on-color md:py-7'}`}>
+      <a href="#top" data-brand onClick={(e) => go(e, '#top')} style={{ opacity: brandOn ? 1 : 0 }} className="h-gs text-[1.3rem] text-white md:text-[1.5rem]">Varney <span className="text-ice">Wellness</span></a>
+      <nav aria-label="Primary" className="hidden lg:block">
+        <ul className="flex items-center gap-1 rounded-full bg-white/[0.06] p-1.5 ring-1 ring-white/10">
+          {LINKS.map(([l, h]) => (
+            <li key={h}><a href={h} onClick={(e) => go(e, h)} className="block rounded-full px-4 py-2 text-[0.95rem] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">{l}</a></li>
+          ))}
+        </ul>
+      </nav>
+      <div className="flex items-center gap-2">
+        <span className="hidden sm:block"><Pill>Book Consultation</Pill></span>
+        <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={open ? 'Close menu' : 'Open menu'} className="grid h-12 w-12 place-items-center rounded-full bg-white text-navy lg:hidden">
+          {open ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.ul initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="on-light absolute inset-x-0 top-[calc(100%+0.5rem)] z-40 grid gap-1 rounded-3xl bg-paper p-3 text-white shadow-2xl ring-1 ring-white/10 lg:hidden">
+            {LINKS.map(([l, h]) => <li key={h}><a href={h} onClick={(e) => { setOpen(false); go(e, h); }} className="block rounded-2xl px-4 py-3 text-[1.05rem] font-medium hover:bg-navy-3">{l}</a></li>)}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
+
+/* ------------------------------------------------------------------ hero */
+function Hero({ ready }) {
   const heroRef = useRef(null);
   // scroll story: the clear doctor photo first, then the hologram and its panels take over
   useEffect(() => {
@@ -129,12 +166,6 @@ function Hero({ ready, brandOn }) {
     }, heroRef);
     return () => ctx.revert();
   }, []);
-  useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 24);
-    on();
-    window.addEventListener('scroll', on, { passive: true });
-    return () => window.removeEventListener('scroll', on);
-  }, []);
   return (
     <section id="top" ref={heroRef} className="p-2.5 md:p-4">
       <div className="relative flex min-h-[min(calc(100svh-2rem),900px)] flex-col overflow-hidden rounded-[1.75rem] bg-violet-deep md:rounded-[2.25rem]">
@@ -146,29 +177,6 @@ function Hero({ ready, brandOn }) {
         <div aria-hidden="true" className="hero-scrim pointer-events-none absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/10 to-navy/85" />
         {/* nav: fixed to the viewport; over the hero it sits in the green, once scrolled it becomes a white bar */}
         <div aria-hidden="true" className="h-[88px] shrink-0 md:h-[104px]" />
-        <header className={`fixed inset-x-2.5 top-2.5 z-[60] flex items-center justify-between px-5 py-5 transition-[background-color,box-shadow] duration-500 md:inset-x-4 md:top-4 md:px-10 ${scrolled ? 'on-light rounded-full bg-paper py-2.5 shadow-[0_18px_40px_-24px_rgb(var(--c-ink)/0.45)] ring-1 ring-white/10 md:py-3' : 'md:py-7'}`}>
-          <a href="#top" data-brand onClick={(e) => go(e, '#top')} style={{ opacity: brandOn ? 1 : 0 }} className="h-gs text-[1.3rem] text-white md:text-[1.5rem]">Varney <span className="text-ice">Wellness</span></a>
-          <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-1 rounded-full bg-white/[0.06] p-1.5 ring-1 ring-white/10">
-              {LINKS.map(([l, h]) => (
-                <li key={h}><a href={h} onClick={(e) => go(e, h)} className="block rounded-full px-4 py-2 text-[0.95rem] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">{l}</a></li>
-              ))}
-            </ul>
-          </nav>
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:block"><Pill>Book Consultation</Pill></span>
-            <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={open ? 'Close menu' : 'Open menu'} className="grid h-12 w-12 place-items-center rounded-full bg-white text-navy lg:hidden">
-              {open ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-          <AnimatePresence>
-            {open && (
-              <motion.ul initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="on-light absolute inset-x-0 top-[calc(100%+0.5rem)] z-40 grid gap-1 rounded-3xl bg-paper p-3 text-white shadow-2xl ring-1 ring-white/10 lg:hidden">
-                {LINKS.map(([l, h]) => <li key={h}><a href={h} onClick={(e) => { setOpen(false); go(e, h); }} className="block rounded-2xl px-4 py-3 text-[1.05rem] font-medium hover:bg-navy-3">{l}</a></li>)}
-              </motion.ul>
-            )}
-          </AnimatePresence>
-        </header>
 
         {/* giant headline behind the person */}
         <motion.h1
@@ -557,7 +565,8 @@ export default function LightPage() {
     <div className="min-h-screen bg-navy text-white">
       <a href="#about" className="skip">Skip to content</a>
       <Loader onReady={() => setReady(true)} onLanded={() => setLanded(true)} />
-      <Hero ready={ready} brandOn={landed} />
+      <SiteHeader brandOn={landed} />
+      <Hero ready={ready} />
       <main>
         <Sec.Manifesto />
         <Treatment />
