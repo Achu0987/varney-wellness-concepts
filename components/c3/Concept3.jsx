@@ -116,7 +116,7 @@ function Kinetic({ lines, className, hidden }) {
             {ws.map((w, wi) => (
               <span key={wi} className="inline-block whitespace-nowrap">
                 {w.split('').map((c, ci) => <span key={ci} className="c3-ch" data-ch>{c}</span>)}
-                {wi < ws.length - 1 && <span className="inline-block w-[0.28em]" />}
+                {wi < ws.length - 1 && ' '}
               </span>
             ))}
           </span>
