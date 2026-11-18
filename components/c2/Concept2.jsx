@@ -156,7 +156,7 @@ function Hero() {
           <span className="hx-l2 hx-in absolute inset-x-[var(--m)] top-[74vh] block text-[10.5vw] leading-[1] md:top-[79vh] md:text-[clamp(2.2rem,6.4vw,7rem)]">beautifully personal.</span>
         </h1>
         {/* the real photograph, clipped to the arch */}
-        <div className="hx-clip absolute inset-0 z-0 overflow-hidden">
+        <div className="hx-clip absolute inset-0 z-0 overflow-hidden [contain:paint]">
           <img src={A('/c2/pool.jpg')} alt="A calm indoor pool with tall windows onto trees (stock placeholder)" className="hx-img h-full w-full object-cover will-change-transform" fetchPriority="high" />
           <div className="hx-scrim absolute inset-0 bg-[linear-gradient(0deg,rgba(10,30,26,0.72),rgba(10,30,26,0.15)_55%,rgba(10,30,26,0.25))] opacity-0" />
         </div>
@@ -215,10 +215,10 @@ function Statement() {
           </div>
         </div>
         <div className="relative h-[34rem]">
-          <div className="st-par absolute left-0 top-0 w-[62%]" data-from="10" data-to="-12">
+          <div className="st-par absolute left-0 top-0 w-[62%] will-change-transform" data-from="10" data-to="-12">
             <div className="st-mask aspect-[3/4] overflow-hidden rounded-t-full"><img loading="lazy" decoding="async" src={A('/c2/towel.jpg')} alt="Woman in a calm, natural-light setting (stock photo)" className="h-full w-full object-cover" /></div>
           </div>
-          <div className="st-par absolute bottom-0 right-0 w-[52%]" data-from="25" data-to="-25">
+          <div className="st-par absolute bottom-0 right-0 w-[52%] will-change-transform" data-from="25" data-to="-25">
             <div className="st-mask aspect-[3/4] overflow-hidden rounded-t-full"><img loading="lazy" decoding="async" src={A('/c2/serum.jpg')} alt="" className="h-full w-full object-cover" /></div>
           </div>
         </div>
@@ -253,7 +253,7 @@ function Experience() {
   return (
     <section id="experience" ref={root} className="relative overflow-hidden bg-[#F7F3EC]">
       <div className="flex min-h-[100svh] items-center">
-        <div ref={track} className="flex items-center gap-6 px-[var(--m)] py-24 md:gap-10">
+        <div ref={track} className="flex items-center gap-6 px-[var(--m)] py-24 will-change-transform md:gap-10">
           <div className="w-[78vw] shrink-0 md:w-[34vw]">
             <h2 className="c2-serif text-[clamp(2.8rem,5.6vw,5.8rem)] leading-[0.98] text-[#173B35]">Four moments, one journey.</h2>
             <p className="mt-6 max-w-[30ch] text-[1.15rem] leading-relaxed text-[#242424]/75">How a visit to the club unfolds, from the door to the follow-up.</p>
@@ -261,7 +261,7 @@ function Experience() {
           </div>
           {CHAPTERS.map((c) => (
             <article key={c.t} className="xp-card relative h-[72svh] w-[80vw] shrink-0 overflow-hidden rounded-[2rem] md:h-[76svh] md:w-[44vw]">
-              <img loading="lazy" decoding="async" src={c.img} alt="" className="xp-img absolute inset-0 h-full w-full object-cover" style={{ objectPosition: c.pos }} />
+              <img loading="lazy" decoding="async" src={c.img} alt="" className="xp-img absolute inset-0 h-full w-full object-cover will-change-transform" style={{ objectPosition: c.pos }} />
               <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(10,30,26,0.78),rgba(10,30,26,0)_55%)]" />
               <div className="absolute inset-x-7 bottom-7 text-[#F7F3EC] md:inset-x-10 md:bottom-10">
                 <h3 className="xp-in c2-serif text-[clamp(2.6rem,4.6vw,4.8rem)] leading-none">{c.t}</h3>

@@ -99,10 +99,10 @@ export default function Concierge() {
       gsap.from('.cc-fade', { y: 40, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.cc-intro', start: 'top 60%' } });
       gsap.from('.cc-how > li', { y: 50, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.cc-how', start: 'top 85%' } });
       gsap.fromTo('.cc-how-line', { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.cc-how', start: 'top 85%', end: 'top 45%', scrub: true } });
-      gsap.fromTo('.cc-hero-arch', { clipPath: 'inset(100% 0 0 0 round 999px 999px 0 0)' }, { clipPath: 'inset(0% 0 0 0 round 999px 999px 0 0)', ease: 'power2.out', scrollTrigger: { trigger: '.cc-intro', start: 'top 75%', end: 'center 55%', scrub: 0.3 } });
+      gsap.fromTo('.cc-hero-arch', { clipPath: 'inset(100% 0 0 0 round 999px 999px 0 0)' }, { clipPath: 'inset(0% 0 0 0 round 999px 999px 0 0)', duration: 1.4, ease: 'power3.inOut', scrollTrigger: { trigger: '.cc-intro', start: 'top 70%' } });
       gsap.fromTo('.cc-hero-img', { scale: 1.3 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.cc-intro', start: 'top bottom', end: 'bottom top', scrub: true } });
       // the invitation arrives tilted, like a card being set down
-      gsap.fromTo('.cc-card', { rotateX: 18, y: 80, opacity: 0 }, { rotateX: 0, y: 0, opacity: 1, ease: 'power3.out', scrollTrigger: { trigger: '.cc-planner', start: 'top 80%', end: 'top 35%', scrub: 0.3 } });
+      gsap.fromTo('.cc-card', { rotateX: 14, y: 60, opacity: 0 }, { rotateX: 0, y: 0, opacity: 1, duration: 1.2, ease: 'power3.out', clearProps: 'transform', scrollTrigger: { trigger: '.cc-planner', start: 'top 75%' } });
       // each question rises in, then its options follow one by one
       panels.current.forEach((el) => {
         if (!el) return;
@@ -146,7 +146,7 @@ export default function Concierge() {
             </button>
           </div>
           <div className="cc-hero-arch relative mx-auto hidden aspect-[3/4] w-full max-w-[24rem] overflow-hidden rounded-t-full lg:block">
-            <img loading="lazy" decoding="async" src={A('/images/p3.jpg')} alt="Friends raising glasses at a celebration (stock placeholder)" className="cc-hero-img h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={A('/images/p3.jpg')} alt="Friends raising glasses at a celebration (stock placeholder)" className="cc-hero-img h-full w-full object-cover will-change-transform" />
           </div>
         </div>
 
@@ -266,7 +266,7 @@ export default function Concierge() {
                   </li>
                 ))}
               </ol>
-              <div className="cc-card relative overflow-hidden rounded-[0.7rem] bg-[#C5A77B] p-[6px] text-[#242424] shadow-[0_40px_80px_-40px_rgba(0,0,0,0.6)]">
+              <div className="cc-card relative overflow-hidden rounded-[0.7rem] bg-[#C5A77B] p-[6px] text-[#242424] shadow-[0_24px_40px_-28px_rgba(0,0,0,0.55)]">
                 <div className="rounded-[0.5rem] bg-[#F7F3EC] p-3">
                   <div className="relative rounded-[0.35rem] bg-[#efe8db] px-8 py-10 text-center">
                     <AnimatePresence mode="wait">
