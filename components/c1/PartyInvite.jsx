@@ -131,7 +131,7 @@ export default function PartyInvite() {
       <div className="pi-env absolute left-1/2 top-[58%] z-20 h-[min(21rem,52vw)] w-[min(32rem,80vw)]" style={{ transformStyle: 'preserve-3d' }} aria-hidden="true">
         <div className="absolute inset-0 rounded-[1.4rem] bg-violet-deep" />
         <div className="pi-mini absolute inset-x-[7%] top-[8%] z-[2] h-[84%] rounded-xl bg-paper p-[6%] shadow-xl">
-          <p className="text-[0.7rem] font-bold text-violet">You’re invited</p>
+          <p className="text-[0.75rem] font-bold text-violet">You’re invited</p>
           <p className="h-gs mt-2 text-[clamp(1rem,2vw,1.5rem)] text-navy">A private Varney experience</p>
         </div>
         <div className="absolute inset-0 z-[3] rounded-[1.4rem] bg-violet-mid [clip-path:polygon(0_0,50%_55%,100%_0,100%_100%,0_100%)]" />

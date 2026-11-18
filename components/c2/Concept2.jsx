@@ -62,6 +62,13 @@ function Loader({ onDone }) {
 /* ------------------------------------------------------------------ nav */
 function Nav() {
   const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (!window.__c2Loading) { setShown(true); return undefined; }
+    const on = () => setShown(true);
+    window.addEventListener('c2-entered', on, { once: true });
+    return () => window.removeEventListener('c2-entered', on);
+  }, []);
   const [solid, setSolid] = useState(false);
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 60);
@@ -72,7 +79,7 @@ function Nav() {
     <>
       <header className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-[var(--m)] py-5 transition-[color,background-color,opacity,transform] duration-700 ${solid ? 'bg-[#F7F3EC] py-3.5 shadow-[0_10px_30px_-20px_rgba(23,59,53,0.35)]' : ''}`}>
         <a href="#top" onClick={(e) => go(e, '#top')} className="leading-none text-[#173B35]" aria-label="Varney Wellness, back to top">
-          <span className="c2-serif text-[1.65rem]">Varney Wellness</span>
+          <span data-brand className="c2-serif text-[1.65rem] transition-opacity duration-300" style={{ opacity: shown ? 1 : 0 }}>Varney Wellness</span>
         </a>
         <nav aria-label="Primary" className="hidden lg:block">
           <ul className="flex gap-9 text-[0.92rem] text-[#242424]/80">
@@ -121,7 +128,13 @@ function Hero() {
       const start = () => { const a = arch(); return `inset(${a.top}px ${a.x}px ${a.b}px ${a.x}px round ${a.w / 2}px ${a.w / 2}px 0px 0px)`; };
       gsap.set('.hx-clip', { clipPath: start() });
       gsap.set('.hx-over > *', { opacity: 0, y: 50 });
-      gsap.fromTo('.hx-in', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1.4, stagger: 0.12, ease: 'power3.out', delay: 0.2 });
+      gsap.set('.hx-in', { y: 40, opacity: 0 });
+      gsap.set('.hx-clip', { scale: 0.92, opacity: 0 });
+      const intro = () => {
+        gsap.to('.hx-clip', { scale: 1, opacity: 1, duration: 1.4, ease: 'power3.out' });
+        gsap.to('.hx-in', { y: 0, opacity: 1, duration: 1.4, stagger: 0.12, ease: 'power3.out', delay: 0.15 });
+      };
+      if (window.__c2Loading) window.addEventListener('c2-entered', intro, { once: true }); else intro();
       if (reduced) return;
       const tl = gsap.timeline({ scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom bottom', scrub: 0.8, invalidateOnRefresh: true } });
       tl.fromTo('.hx-clip', { clipPath: start }, { clipPath: 'inset(0px 0px 0px 0px round 0px 0px 0px 0px)', ease: 'power2.inOut', duration: 1 }, 0)
@@ -471,6 +484,7 @@ export default function Concept2() {
     let lenis; let tick;
     if (!reduced) {
       lenis = new Lenis({ lerp: 0.075 });
+      if (window.__c2Loading) lenis.stop();
       window.__lenis = lenis;
       lenis.on('scroll', ScrollTrigger.update);
       tick = (t) => lenis.raf(t * 1000);
