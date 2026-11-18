@@ -1,17 +1,15 @@
 'use client';
 import { A } from '@/lib/asset';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, Menu, X, Plus } from 'lucide-react';
-import { C3, makeStage } from './Crowd';
 import Planner from './Planner';
 
 gsap.registerPlugin(ScrollTrigger);
-const Crowd = dynamic(() => import('./Crowd'), { ssr: false });
+const C3 = { lav: '#E9DFFF', pur: '#38206B', off: '#FAF9F6' };
 const ease = [0.16, 1, 0.3, 1];
 const LINKS = [['Care', '#care'], ['Moments', '#moments'], ['Visits', '#visits'], ['Parties', '#parties'], ['Contact', '#contact']];
 const toast = (m) => window.dispatchEvent(new CustomEvent('c3-toast', { detail: m }));
@@ -104,118 +102,130 @@ function Nav() {
   );
 }
 
-/* ------------------------------------------------------------------ hero: the people stand on the line and look back at you */
-const WORDS = [['FEEL', 'BETTER.'], ['LIVE', 'DIFFERENTLY.']];
-function Kinetic({ lines, className, hidden }) {
-  const Tag = hidden ? 'div' : 'h1';
-  return (
-    <Tag className={className} aria-hidden={hidden || undefined} aria-label={hidden ? undefined : 'Feel better. Live differently.'}>
-      {lines.map((ws, li) => (
-        <span key={li} className="c3-line">
-          <span aria-hidden="true">
-            {ws.map((w, wi) => (
-              <span key={wi} className="inline-block whitespace-nowrap">
-                {w.split('').map((c, ci) => <span key={ci} className="c3-ch" data-ch>{c}</span>)}
-                {wi < ws.length - 1 && ' '}
-              </span>
-            ))}
-          </span>
-        </span>
-      ))}
-    </Tag>
-  );
-}
+/* ------------------------------------------------------------------ hero: a crowd of real faces in depth; scrolling flies the camera through them */
+const FACES = [
+  // [image, screen x (vw), screen y (vh), depth z (px), on-screen width (vw)] at the first frame
+  ['p1', -34, -25, -200, 11], ['p2', 31, -27, -350, 10], ['w2', -31, 23, -500, 10], ['p7', 36, 25, -650, 11],
+  ['p8', -7, -32, -800, 8], ['p10', 9, 28, -900, 8], ['w4', -44, 2, -1000, 9], ['p6', 44, -4, -1100, 9],
+  ['p3', -17, -23, -1250, 7], ['p9', 20, 23, -1350, 7], ['w3', -31, 15, -1450, 7], ['p5', 29, -14, -1550, 6.5],
+  ['w1', 2, -21, -1650, 6], ['m1', -4, 22, -1750, 6],
+];
+const PERSP = 1000;
+const depthK = (z) => (PERSP - z) / PERSP; // world size needed to look a given size at depth z
+const DEPTH = 2700; // the group photo sits this far back; the camera arrives at it at 78% of the scroll
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 function Hero() {
   const root = useRef(null);
-  const field = useRef(null);
-  const inner = useRef(null);
-  const bar = useRef(null);
-  const stage = useMemo(() => makeStage({ floor: 0.72 }), []);
-  const [specs, setSpecs] = useState([]);
-
-  useEffect(() => {
-    const w = window.innerWidth;
-    const n = w < 640 ? 5 : w < 1024 ? 7 : 9;
-    const pal = [C3.cor, C3.lav3, C3.pur, C3.lav, C3.cor, C3.pur3, C3.off, C3.lav3, C3.cor];
-    const acc = [null, null, 'shades', null, 'band', null, null, 'hat', null];
-    setSpecs(Array.from({ length: n }).map((_, i) => {
-      const seed = ((i + 3) * 7919 % 101) / 101;
-      return { key: `h${i}`, x: 0.07 + (i / (n - 1)) * 0.86 + (seed - 0.5) * 0.03, scale: 0.86 + seed * 0.3, color: pal[i], acc: acc[i], seed, delay: 0.5 + i * 0.07 };
-    }));
-  }, []);
+  const tilt = useRef(null);
+  const head = useRef(null);
+  const intro = useRef(null);
+  const cards = useRef([]);
+  const group = useRef(null);
+  const groupImg = useRef(null);
+  const outro = useRef(null);
+  const hint = useRef(null);
 
   useEffect(() => {
     const el = root.current;
-    const fine = window.matchMedia('(pointer: fine)').matches;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const chars = [...el.querySelectorAll('[data-ch]')];
-    const n = chars.length / 2;
-    let rects = []; let raf = 0; const ptr = { x: -9999, y: -9999 };
-    const measure = () => { rects = chars.slice(0, n).map((c) => { const r = c.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * 0.6]; }); };
-    const paint = () => {
-      raf = 0;
-      for (let i = 0; i < n; i++) {
-        const [cx, cy] = rects[i] || [0, 0];
-        const d = Math.hypot(ptr.x - cx, (ptr.y - cy) * 1.4);
-        const f = Math.max(0, 1 - d / 260);
-        const e = f * f * (3 - 2 * f);
-        const tr = e ? `translateY(${-e * 10}%) scaleY(${1 + e * 0.32}) scaleX(${1 - e * 0.06})` : '';
-        chars[i].style.transform = tr; chars[i + n].style.transform = tr;
-      }
-    };
-    const move = (e) => {
-      const r = el.getBoundingClientRect();
-      stage.pointer.x = e.clientX - r.left; stage.pointer.y = e.clientY - Math.max(0, r.top); stage.pointer.t = performance.now() / 1000;
-      if (fine && !reduced) { ptr.x = e.clientX; ptr.y = e.clientY; if (!raf) raf = requestAnimationFrame(paint); }
-    };
-    const leave = () => { ptr.x = -9999; if (!raf) raf = requestAnimationFrame(paint); };
-    const click = (e) => {
-      if (e.target.closest('a,button')) return;
-      const w = el.clientWidth;
-      let best = -1; let bd = 1e9;
-      specs.forEach((s, i) => { const d = Math.abs(s.x * w - e.clientX); if (d < bd) { bd = d; best = i; } });
-      if (best >= 0 && bd < 140) stage.hops.push(best);
-    };
-    const t = setTimeout(measure, 1200);
-    window.addEventListener('resize', measure);
-    el.addEventListener('pointermove', move, { passive: true });
-    el.addEventListener('pointerleave', leave);
-    el.addEventListener('click', click);
-    // the purple floor rises and swallows the headline, carrying the crowd away
-    const ctx = reduced ? null : gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.3,
-        onUpdate: (st) => {
-          const p = st.progress;
-          const floor = 0.72 * (1 - Math.min(1, p / 0.8));
-          stage.floor = floor;
-          field.current.style.transform = `translate3d(0,${floor * 100}%,0)`;
-          inner.current.style.transform = `translate3d(0,${-floor * 100}%,0)`;
-          bar.current.style.opacity = String(Math.max(0, 1 - p * 3.2));
-          if (p > 0.02) measure();
-        },
-      });
-    }, el);
-    return () => { clearTimeout(t); window.removeEventListener('resize', measure); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); el.removeEventListener('click', click); ctx?.revert(); cancelAnimationFrame(raf); };
-  }, [stage, specs]);
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    let vw = window.innerWidth; let vh = window.innerHeight;
+    let mob = vw < 768;
+    let last = -1;
 
-  const headCls = 'c3-display absolute inset-x-0 top-[17svh] mx-auto w-full px-[var(--m)] text-center text-[clamp(2.75rem,13vw,6rem)] md:top-[16svh] md:text-[min(10.6vw,16svh,9.5rem)] lg:text-[min(9.6vw,16svh,9.5rem)]';
+    const render = (p) => {
+      if (Math.abs(p - last) < 0.0004) return;
+      last = p;
+      const dolly = easeInOut(clamp01(p / 0.78)) * DEPTH;
+      // the headline lives at z = 0, so the camera flies straight through the words
+      const hz = dolly;
+      head.current.style.transform = `translate3d(-50%,-50%,${hz}px)`;
+      head.current.style.opacity = String(clamp01(1 - (hz - 250) / 450));
+      intro.current.style.opacity = String(clamp01(1 - p / 0.06));
+      intro.current.style.transform = `translate3d(0,${p * 160}px,0)`;
+      if (hint.current) hint.current.style.opacity = String(clamp01(1 - p / 0.03));
+      FACES.forEach(([, x, y, z, w], i) => {
+        const c = cards.current[i];
+        if (!c) return;
+        const wz = z + dolly;
+        const op = clamp01((wz + 2900) / 500) * clamp01((820 - wz) / 380);
+        c.style.opacity = String(op);
+        c.style.visibility = op < 0.01 ? 'hidden' : 'visible';
+        const k = depthK(z);
+        const yy = mob && y > 0 ? y * 0.6 : y;
+        c.style.transform = `translate3d(calc(${x * k}vw - 50%), calc(${yy * k}vh - 50%), ${wz}px)`;
+      });
+      // the group photo arrives at z = 0, then opens to fill the whole screen
+      const gz = -DEPTH + dolly;
+      const open = easeInOut(clamp01((p - 0.78) / 0.14));
+      const s0 = mob ? 0.8 : 0.46;
+      const s = s0 + (1.02 - s0) * open;
+      group.current.style.transform = `translate3d(0,0,${gz}px) scale(${s})`;
+      group.current.style.opacity = String(clamp01((p - 0.22) / 0.18));
+      group.current.style.borderRadius = `${(1 - open) * 18 / s}px`;
+      groupImg.current.style.transform = `scale(${1.25 - 0.25 * open})`;
+      outro.current.style.opacity = String(clamp01((p - 0.88) / 0.07));
+      outro.current.style.transform = `translate3d(0,${(1 - clamp01((p - 0.88) / 0.07)) * 40}px,0)`;
+      outro.current.style.pointerEvents = p > 0.9 ? 'auto' : 'none';
+    };
+
+    const sizeCards = () => {
+      vw = window.innerWidth; vh = window.innerHeight; mob = vw < 768;
+      FACES.forEach(([, , , z, w], i) => { const c = cards.current[i]; if (c) c.style.width = `${w * depthK(z) * (mob ? 1.6 : 1)}vw`; });
+      last = -1;
+    };
+    sizeCards();
+    render(0);
+    window.addEventListener('resize', sizeCards);
+
+    let st;
+    if (!reduced) {
+      st = ScrollTrigger.create({ trigger: el, start: 'top top', end: 'bottom bottom', onUpdate: (s) => render(s.progress), onRefresh: (s) => { last = -1; render(s.progress); } });
+    }
+
+    // the crowd leans toward the cursor: real parallax, because every face sits at its own depth
+    let rx; let ry; let mv;
+    if (fine && !reduced) {
+      rx = gsap.quickTo(tilt.current, 'rotationX', { duration: 1.2, ease: 'power3.out' });
+      ry = gsap.quickTo(tilt.current, 'rotationY', { duration: 1.2, ease: 'power3.out' });
+      mv = (e) => { const nx = e.clientX / window.innerWidth - 0.5; const ny = e.clientY / window.innerHeight - 0.5; ry(nx * 9); rx(-ny * 7); };
+      window.addEventListener('pointermove', mv, { passive: true });
+    }
+    return () => { st?.kill(); window.removeEventListener('resize', sizeCards); if (mv) window.removeEventListener('pointermove', mv); };
+  }, []);
+
   return (
-    <section id="top" ref={root} className="relative h-[210svh] bg-pur">
-      <div className="sticky top-0 h-[100svh] overflow-hidden bg-off">
-        <Kinetic lines={WORDS} className={`${headCls} text-pur`} />
-        <div ref={field} className="absolute inset-0 overflow-hidden bg-pur will-change-transform" style={{ transform: 'translate3d(0,72%,0)' }}>
-          <div ref={inner} className="absolute inset-0 will-change-transform" style={{ transform: 'translate3d(0,-72%,0)' }}>
-            <Kinetic lines={WORDS} className={`${headCls} text-cor`} hidden />
+    <section id="top" ref={root} className="relative h-[460svh] bg-pur">
+      <div className="sticky top-0 h-[100svh] overflow-hidden bg-off" style={{ perspective: `${PERSP}px` }}>
+        <div ref={group} className="absolute inset-0 overflow-hidden opacity-0 will-change-transform" style={{ transformOrigin: '50% 50%' }}>
+          <img ref={groupImg} src={A('/c3/friends.jpg')} alt="Four friends laughing together over coffee (stock photo)" decoding="async" className="h-full w-full object-cover will-change-transform" draggable="false" />
+          <div className="absolute inset-0 bg-[#24212B]/45" />
+        </div>
+        <div ref={tilt} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          {FACES.map(([img], i) => (
+            <figure key={img} ref={(n) => { cards.current[i] = n; }} className="absolute left-1/2 top-1/2 m-0 overflow-hidden rounded-[14px] bg-lav-2 will-change-transform" style={{ aspectRatio: '4/5', width: '11vw' }}>
+              <img src={A(`/c3/${img}.jpg`)} alt="" decoding="async" fetchPriority={i < 4 ? 'high' : 'auto'} className="h-full w-full object-cover" draggable="false" />
+            </figure>
+          ))}
+          <h1 ref={head} className="c3-display absolute left-1/2 top-[44%] m-0 w-[min(94vw,1400px)] text-center text-[clamp(2.75rem,13vw,6rem)] text-pur will-change-transform md:text-[min(10.6vw,17svh,10rem)] lg:text-[min(9.4vw,17svh,10rem)]" style={{ transform: 'translate3d(-50%,-50%,0)' }}>
+            <span className="c3-line"><span>Feel better.</span></span>
+            <span className="c3-line"><span>Live differently.</span></span>
+          </h1>
+        </div>
+        <div ref={intro} className="absolute inset-x-0 bottom-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-5 px-[var(--m)] pb-7 md:flex-row md:items-end md:justify-between md:pb-9">
+          <p className="c3-fade max-w-[30ch] text-[clamp(1.0625rem,1rem+0.5vw,1.375rem)] font-medium text-gra">Physician-led wellness and aesthetics in Florida, designed around real people.</p>
+          <div className="c3-fade flex flex-wrap gap-3">
+            <a href="#care" onClick={(e) => go(e, '#care')} className="inline-flex min-h-[52px] items-center gap-2 rounded-full bg-pur px-7 font-medium text-off transition-transform hover:-translate-y-0.5">Explore what's possible <ArrowRight size={18} /></a>
+            <a href="#parties" onClick={(e) => go(e, '#parties')} className="inline-flex min-h-[52px] items-center rounded-full bg-cor px-6 font-medium text-gra transition-transform hover:-translate-y-0.5">Plan a party</a>
           </div>
         </div>
-        <Crowd specs={specs} stage={stage} unit={1} className="absolute inset-0 z-10 [&_canvas]:!h-full" />
-        <div ref={bar} className="absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-[1400px] flex-col gap-5 px-[var(--m)] pb-7 md:flex-row md:items-end md:justify-between md:pb-9">
-          <p className="c3-fade max-w-[30ch] text-[clamp(1.0625rem,1rem+0.5vw,1.375rem)] font-medium text-off">Wellness designed around real people.</p>
-          <div className="c3-fade flex flex-wrap gap-3">
-            <a href="#care" onClick={(e) => go(e, '#care')} className="inline-flex min-h-[52px] items-center gap-2 rounded-full bg-cor px-7 font-medium text-gra transition-transform hover:-translate-y-0.5">Explore what's possible <ArrowRight size={18} /></a>
-            <a href="#parties" onClick={(e) => go(e, '#parties')} className="inline-flex min-h-[52px] items-center rounded-full bg-off px-6 font-medium text-pur transition-transform hover:-translate-y-0.5">Plan a party</a>
+        <p ref={hint} className="absolute left-1/2 top-[66%] z-10 hidden -translate-x-1/2 text-[0.9375rem] text-[#5B5566] md:block" aria-hidden="true">Scroll to meet them</p>
+        <div ref={outro} className="absolute inset-0 z-20 motion-reduce:hidden flex flex-col items-start justify-end px-[var(--m)] pb-[12svh] text-off opacity-0" style={{ pointerEvents: 'none' }}>
+          <div className="mx-auto w-full max-w-[1400px]">
+            <p className="c3-display text-[clamp(2.2rem,6.2vw,6rem)]">Designed around <span className="block text-cor">real people.</span></p>
+            <a href="#care" onClick={(e) => go(e, '#care')} className="mt-8 inline-flex min-h-[52px] items-center gap-2 rounded-full bg-cor px-7 font-medium text-gra transition-transform hover:-translate-y-0.5">See how we help <ArrowRight size={18} /></a>
           </div>
         </div>
       </div>
@@ -363,15 +373,42 @@ const MOMENTS = [
 ];
 function Moments() {
   const [i, setI] = useState(0);
+  const root = useRef(null);
+  const bar = useRef(null);
   const m = MOMENTS[i];
+  useEffect(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+      let cur = 0;
+      const st = ScrollTrigger.create({
+        trigger: root.current, start: 'top top', end: 'bottom bottom',
+        onUpdate: (t) => {
+          const k = Math.min(MOMENTS.length - 1, Math.floor(t.progress * MOMENTS.length));
+          if (k !== cur) { cur = k; setI(k); }
+          if (bar.current) bar.current.style.transform = `scaleY(${t.progress})`;
+        },
+      });
+      return () => st.kill();
+    });
+    return () => mm.revert();
+  }, []);
+  const pick = (k) => {
+    const el = root.current;
+    if (window.innerWidth >= 1024 && window.__lenis && el) {
+      const y = el.offsetTop + ((el.offsetHeight - window.innerHeight) * (k + 0.5)) / MOMENTS.length;
+      window.__lenis.scrollTo(y, { duration: 1 });
+    } else setI(k);
+  };
   return (
-    <section id="moments" className="relative overflow-hidden bg-cor px-[var(--m)] py-24 text-gra md:py-28">
-      <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:min-h-[86svh] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <section id="moments" ref={root} className="relative bg-cor text-gra lg:h-[360svh]">
+      <div className="overflow-hidden px-[var(--m)] py-24 md:py-28 lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:items-center lg:py-0">
+      <span className="absolute left-[calc(var(--m)/2)] top-1/2 hidden h-[40svh] w-1 -translate-y-1/2 overflow-hidden rounded-full bg-[#E5674F] lg:block" aria-hidden="true"><span ref={bar} className="block h-full w-full origin-top rounded-full bg-gra" style={{ transform: 'scaleY(0)' }} /></span>
+      <div className="mx-auto grid w-full max-w-[1400px] items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <div className="order-2 lg:order-1">
           <h2 className="c3-display text-[clamp(2.4rem,4.6vw,4.4rem)]" data-reveal>Made for <br />real moments</h2>
           <div className="-mx-[var(--m)] mt-8 flex gap-6 overflow-x-auto px-[var(--m)] pb-2 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:px-0" role="tablist" aria-label="Moments">
             {MOMENTS.map((x, k) => (
-              <button key={x.t} type="button" role="tab" aria-selected={i === k} onClick={() => setI(k)} onMouseEnter={() => setI(k)}
+              <button key={x.t} type="button" role="tab" aria-selected={i === k} onClick={() => pick(k)}
                 className={`flex shrink-0 items-center gap-3 whitespace-nowrap text-left text-[clamp(1.5rem,2.6vw,2.6rem)] font-bold leading-[1.15] transition-colors duration-300 ${i === k ? 'text-gra' : 'text-[#7A2E22] hover:text-gra'}`}>
                 <span className={`hidden h-3 rounded-full bg-gra transition-[width] duration-500 lg:inline-block ${i === k ? 'w-10' : 'w-0'}`} aria-hidden="true" />
                 {x.t}
@@ -386,11 +423,12 @@ function Moments() {
           <motion.div className="absolute inset-0 rounded-full" initial={false} style={{ backgroundColor: MOMENTS[0].disc }} animate={{ backgroundColor: m.disc }} transition={{ duration: 0.6 }} />
           <div className="absolute inset-x-[22%] bottom-[8%] top-[-6%] overflow-hidden rounded-full">
             <AnimatePresence initial={false}>
-              <motion.img key={m.img} src={m.img} alt={m.alt} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover"
-                initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5, ease }} />
+              <motion.img key={m.img} src={m.img} alt={m.alt} decoding="async" className="absolute inset-0 h-full w-full object-cover"
+                initial={{ clipPath: 'inset(100% 0 0 0)', scale: 1.15 }} animate={{ clipPath: 'inset(0% 0 0 0)', scale: 1 }} exit={{ opacity: 0, transition: { delay: 0.5, duration: 0.2 } }} transition={{ duration: 0.75, ease }} />
             </AnimatePresence>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
@@ -490,7 +528,7 @@ function Contact() {
         ))}
       </div>
       <div className="mx-auto max-w-[1400px] px-[var(--m)]">
-        <div className="mt-16 flex flex-col gap-6 md:mt-20 md:flex-row md:items-end md:justify-between"><h2 className="c3-display text-[clamp(2.4rem,6vw,5.4rem)]" data-reveal>Start with <br />a conversation</h2><p className="max-w-[30ch] text-[1.125rem] text-gra md:text-right" data-reveal="0.1">Prefer to talk? Phone placeholder. The practice confirms its contact details before launch.</p></div>
+        <div className="mt-16 flex flex-col gap-6 md:mt-20 lg:flex-row lg:items-end lg:justify-between"><h2 className="c3-display text-[clamp(2.4rem,6vw,5.4rem)]" data-reveal>Start with <br />a conversation</h2><p className="max-w-[30ch] text-[1.125rem] text-gra lg:text-right" data-reveal="0.1">Prefer to talk? Phone placeholder. The practice confirms its contact details before launch.</p></div>
         {!sent ? (
           <form onSubmit={submit} noValidate className="mt-10 grid gap-2 md:grid-cols-3" data-reveal="0.1">
             <label htmlFor="c3-name" className="sr-only">Your name</label>

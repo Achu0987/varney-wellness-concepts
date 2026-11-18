@@ -1,11 +1,10 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
+import gsap from 'gsap';
+import { A } from '@/lib/asset';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Cake, Gem, Users, Leaf, Briefcase, Sparkles, Building2, Home, MapPin, Compass, Check, Download, ChevronLeft, ChevronRight, PartyPopper } from 'lucide-react';
-import { C3, makeStage } from './Crowd';
+import { ArrowLeft, ArrowRight, Cake, Gem, Users, Leaf, Briefcase, Sparkles, Building2, Home, MapPin, Compass, Check, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Crowd = dynamic(() => import('./Crowd'), { ssr: false });
 const ease = [0.16, 1, 0.3, 1];
 const toast = (m) => window.dispatchEvent(new CustomEvent('c3-toast', { detail: m }));
 
@@ -28,99 +27,101 @@ const TIMES = ['Morning', 'Afternoon', 'Evening'];
 const INTERESTS = ['Botox consultation, if approved', 'General aesthetic consultation', 'Not sure yet'];
 const STEPS = ['Occasion', 'Venue', 'Guests', 'Details', 'Review', 'Send'];
 
-const STYLE = {
-  none: { pal: [C3.cor, C3.lav, C3.off, C3.lav3, C3.cor, C3.lav] },
-  birthday: { pal: [C3.cor, C3.lav, C3.off, C3.lav3], acc: () => 'hat' },
-  bridal: { pal: [C3.lav, C3.lav3, C3.cor, C3.lav], acc: (i, n) => (i === Math.floor((n - 1) / 2) ? 'veil' : i % 2 ? 'flower' : null), lead: C3.off },
-  friends: { pal: [C3.cor, C3.lav3, C3.off, C3.pur3, C3.lav], acc: (i) => (i % 2 ? 'shades' : null) },
-  wellness: { pal: [C3.lav, C3.off, C3.lav3], acc: () => 'band' },
-  corporate: { pal: [C3.pur3, C3.off, C3.lav3, C3.gra], acc: () => 'tie' },
-  custom: { pal: [C3.cor, C3.lav, C3.lav3, C3.off], acc: () => 'spark' },
+/* the stage: a live mood board made of real photographs. Venue = the room, occasion = the card, guests = real faces, date = the calendar tile */
+const VENUE_IMG = {
+  clinic: [A('/c3/v-clinic2.jpg'), 'A bright, calm waiting room (stock photo)'],
+  home: [A('/c3/v-home.jpg'), 'A modern living room with tall windows (stock photo)'],
+  venue: [A('/c3/v-venue2.jpg'), 'An event space set with round tables (stock photo)'],
+  other: [A('/c3/v-other.jpg'), 'A garden courtyard with string lights (stock photo)'],
 };
+const OCC_IMG = {
+  birthday: A('/c3/glitter.jpg'), bridal: A('/c3/o-bridal2.jpg'), friends: A('/c3/table.jpg'),
+  wellness: A('/c2/eucalyptus.jpg'), corporate: A('/c3/friends.jpg'), custom: A('/c3/o-cake.jpg'),
+};
+const FACE_IMG = ['p1', 'p2', 'w2', 'p7', 'p8', 'p10', 'w4', 'p6', 'p3', 'p9', 'w3', 'p5', 'w1', 'm1', 'w1', 'p2', 'p7', 'p1'].map((f) => A(`/c3/${f}.jpg`));
 
-function crowdSpecs(occ, n) {
-  const s = STYLE[occ] || STYLE.none;
-  const two = n > 7;
-  const back = two ? Math.floor(n / 2) : 0;
-  const front = n - back;
-  const out = [];
-  const row = (count, z, lift, scale, offset) => {
-    for (let i = 0; i < count; i++) {
-      const idx = out.length;
-      const span = count === 1 ? 0 : 0.76 - (count < 4 ? 0.3 : 0);
-      const x = 0.5 - span / 2 + (count === 1 ? 0 : (i / (count - 1)) * span) + offset;
-      const seed = (idx * 9301 + 49297) % 233280 / 233280;
-      const leadIdx = Math.floor((front - 1) / 2);
-      const isLead = z === 0 && i === leadIdx;
-      out.push({
-        key: `${occ}-${idx}`, x, z, lift, scale: scale * (0.9 + seed * 0.22), seed,
-        color: isLead && s.lead ? s.lead : s.pal[idx % s.pal.length],
-        acc: s.acc ? s.acc(z === 0 ? i : -1, z === 0 ? front : 0) : null,
-        delay: idx * 0.045,
-      });
-    }
-  };
-  row(back, -260, 46, 0.8, 0.03);
-  row(front, 0, 0, 1, 0);
-  return out;
-}
-
-/* backdrops: one flat world per venue, drawn in the palette */
-function Backdrop({ venue, occ }) {
-  const word = OCC.find((o) => o.id === occ)?.word || 'Party';
-  const scenes = {
-    none: { wall: '#FF9C8A', floor: C3.cor, ink: '#FFB3A5' },
-    clinic: { wall: C3.lav, floor: C3.off, ink: '#DCCEFA' },
-    home: { wall: '#F6D3CB', floor: '#EBB9AD', ink: '#FBE2DC' },
-    venue: { wall: C3.gra, floor: C3.pur, ink: '#3A3545' },
-    other: { wall: '#DCCEFA', floor: C3.off, ink: '#CDBBF5' },
-  };
-  const sc = scenes[venue || 'none'];
+function Stage({ venue, occ, guests, date, done, stageRef }) {
+  const layers = useRef([]);
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || !window.matchMedia('(pointer: fine)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const qs = layers.current.filter(Boolean).map((n) => [gsap.quickTo(n, 'x', { duration: 0.9, ease: 'power3.out' }), gsap.quickTo(n, 'y', { duration: 0.9, ease: 'power3.out' }), Number(n.dataset.depth)]);
+    const move = (e) => { const r = el.getBoundingClientRect(); const nx = (e.clientX - r.left) / r.width - 0.5; const ny = (e.clientY - r.top) / r.height - 0.5; qs.forEach(([x, y, d]) => { x(nx * d); y(ny * d); }); };
+    const leave = () => qs.forEach(([x, y]) => { x(0); y(0); });
+    el.addEventListener('pointermove', move); el.addEventListener('pointerleave', leave);
+    return () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); };
+  }, [stageRef]);
+  const n = guests != null ? GUESTS[guests].n : 0;
+  const shown = Math.min(n, 9);
+  const occT = OCC.find((o) => o.id === occ)?.t;
+  const venueT = VENUES.find((v) => v.id === venue)?.t;
   return (
-    <AnimatePresence initial={false}>
-      <motion.div key={venue || 'none'} className="absolute inset-0" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7, ease }}>
-        <svg viewBox="0 0 1000 620" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
-          <rect width="1000" height="620" fill={sc.wall} />
-          <rect y="521" width="1000" height="99" fill={sc.floor} />
-          {venue === 'clinic' && (
-            <g>
-              <rect x="590" y="90" width="300" height="300" rx="150" fill={C3.off} />
-              <rect x="736" y="90" width="8" height="300" fill="#DCCEFA" />
-              <rect x="590" y="236" width="300" height="8" fill="#DCCEFA" />
-              <rect x="80" y="420" width="70" height="101" rx="10" fill={C3.lav3} />
-              <ellipse cx="115" cy="400" rx="48" ry="40" fill="#8E7AC8" />
-            </g>
+    <div ref={stageRef} className="relative aspect-[5/4] w-full overflow-hidden rounded-[20px] bg-[#2B1854] sm:aspect-[16/11]">
+      {/* the room */}
+      <div ref={(r) => { layers.current[0] = r; }} data-depth="-14" className="absolute -inset-4">
+        <AnimatePresence initial={false}>
+          {venue ? (
+            <motion.img key={venue} src={VENUE_IMG[venue][0]} alt={VENUE_IMG[venue][1]} className="absolute inset-0 h-full w-full object-cover"
+              initial={{ clipPath: 'inset(0 0 0 100%)', scale: 1.12 }} animate={{ clipPath: 'inset(0 0 0 0%)', scale: 1 }} exit={{ opacity: 0, transition: { delay: 0.6, duration: 0.3 } }} transition={{ duration: 0.9, ease }} />
+          ) : (
+            <motion.div key="empty" className="absolute inset-0 grid place-items-center" exit={{ opacity: 0 }}>
+              <p className="c3-display px-8 text-center text-[clamp(1.8rem,5cqw,3.2rem)] text-[#5A3E9A]">Your party <br />starts here</p>
+            </motion.div>
           )}
-          {venue === 'home' && (
-            <g>
-              <rect x="560" y="380" width="380" height="141" rx="40" fill={C3.pur3} />
-              <rect x="540" y="350" width="60" height="171" rx="30" fill={C3.pur} />
-              <rect x="900" y="350" width="60" height="171" rx="30" fill={C3.pur} />
-              <rect x="790" y="140" width="6" height="240" fill={C3.gra} />
-              <path d="M745 140 h96 l-20 -60 h-56 z" fill={C3.off} />
-            </g>
+        </AnimatePresence>
+        {venue && <div className="absolute inset-0 bg-[#24212B]/25" />}
+      </div>
+
+      {/* the occasion card */}
+      <div ref={(r) => { layers.current[1] = r; }} data-depth="22" className="absolute left-[5%] top-[7%] w-[36%]">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {occ && (
+            <motion.figure key={occ} className="m-0 rounded-[14px] bg-off p-2 pb-3 shadow-[0_24px_50px_-20px_rgba(20,10,40,0.6)]"
+              initial={{ y: -60, rotate: -14, opacity: 0 }} animate={{ y: 0, rotate: -4, opacity: 1 }} exit={{ y: 40, rotate: 8, opacity: 0 }} transition={{ type: 'spring', stiffness: 160, damping: 18 }}>
+              <img src={OCC_IMG[occ]} alt="" className="aspect-[4/3] w-full rounded-[10px] object-cover" />
+              <figcaption className="mt-2 px-1 text-[clamp(0.8125rem,2.2cqw,1.0625rem)] font-bold leading-tight text-pur">{occT}</figcaption>
+            </motion.figure>
           )}
-          {venue === 'venue' && (
-            <g>
-              <path d="M200 0 L60 521 H360 Z" fill="#E9DFFF" opacity="0.13" />
-              <path d="M500 0 L360 521 H660 Z" fill="#FF806B" opacity="0.14" />
-              <path d="M800 0 L660 521 H960 Z" fill="#E9DFFF" opacity="0.13" />
-              {Array.from({ length: 22 }).map((_, i) => (
-                <circle key={i} cx={30 + i * 45} cy={60 + Math.sin(i * 0.7) * 18} r="6" fill={i % 3 ? C3.lav : C3.cor} />
-              ))}
-            </g>
+        </AnimatePresence>
+      </div>
+
+      {/* the date tile */}
+      <div ref={(r) => { layers.current[2] = r; }} data-depth="30" className="absolute right-[5%] top-[7%]">
+        <AnimatePresence initial={false}>
+          {date && (
+            <motion.div key={date.toDateString()} className="w-[clamp(84px,18cqw,128px)] overflow-hidden rounded-[14px] bg-off text-center shadow-[0_24px_50px_-20px_rgba(20,10,40,0.6)]"
+              initial={{ scale: 0.4, rotate: 20, opacity: 0 }} animate={{ scale: 1, rotate: 4, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ type: 'spring', stiffness: 220, damping: 16 }}>
+              <p className="bg-cor py-1.5 text-[0.8125rem] font-medium text-gra">{date.toLocaleDateString('en-US', { month: 'short' })}</p>
+              <p className="c3-display py-2 text-[clamp(2rem,7cqw,3.2rem)] text-pur">{date.getDate()}</p>
+            </motion.div>
           )}
-          {venue === 'other' && (
-            <g>
-              <circle cx="760" cy="200" r="90" fill={C3.cor} />
-              <ellipse cx="200" cy="560" rx="420" ry="150" fill={C3.lav3} />
-              <ellipse cx="820" cy="580" rx="380" ry="120" fill="#CDBBF5" />
-            </g>
-          )}
-        </svg>
-        <p className="c3-display pointer-events-none absolute left-[5%] top-[7%] select-none whitespace-nowrap text-[14cqw]" style={{ color: sc.ink }} aria-hidden="true">{word}</p>
-      </motion.div>
-    </AnimatePresence>
+        </AnimatePresence>
+      </div>
+
+      {/* the guests: real faces */}
+      <div ref={(r) => { layers.current[3] = r; }} data-depth="12" className="absolute bottom-[6%] left-[5%] right-[5%]">
+        {venueT && <p className="mb-3 inline-flex rounded-full bg-off px-3.5 py-1.5 text-[0.875rem] font-medium text-gra">{venueT}</p>}
+        <div className="flex items-center">
+          <AnimatePresence initial={false}>
+            {Array.from({ length: shown }).map((_, k) => (
+              <motion.img key={k} src={FACE_IMG[k]} alt="" className="-ml-3 aspect-square w-[clamp(40px,10cqw,68px)] rounded-full border-[3px] border-off object-cover first:ml-0"
+                initial={{ y: 30, scale: 0.4, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 20, scale: 0.4, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 18, delay: k * 0.04 }} />
+            ))}
+          </AnimatePresence>
+          {n > shown && <motion.span key={n} initial={{ scale: 0 }} animate={{ scale: 1 }} className="-ml-3 grid aspect-square w-[clamp(40px,10cqw,68px)] place-items-center rounded-full border-[3px] border-off bg-cor text-[clamp(0.8125rem,2.4cqw,1.125rem)] font-bold text-gra">+{n - shown}</motion.span>}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {done && (
+          <motion.div initial={{ scale: 1.6, rotate: -18, opacity: 0 }} animate={{ scale: 1, rotate: -8, opacity: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 14 }}
+            className="absolute right-[6%] top-[40%] rounded-[12px] border-[3px] border-cor bg-off px-4 py-2 text-center">
+            <p className="c3-display text-[clamp(1.1rem,3.4cqw,1.6rem)] text-pur">Inquiry ready</p>
+            <p className="text-[0.8125rem] text-gra">Pending confirmation</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -205,22 +206,11 @@ export default function Planner() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', area: '', notes: '' });
   const [errors, setErrors] = useState({});
   const [done, setDone] = useState(false);
-  const stage = useMemo(() => makeStage({ floor: 0.84 }), []);
   const stageEl = useRef(null);
   const panelTop = useRef(null);
 
-  const n = guests != null ? GUESTS[guests].n : 4;
-  const specs = useMemo(() => crowdSpecs(occ || 'none', n), [occ, n]);
 
-  useEffect(() => {
-    const el = stageEl.current;
-    if (!el) return undefined;
-    const move = (e) => { const r = el.getBoundingClientRect(); stage.pointer.x = e.clientX - r.left; stage.pointer.y = e.clientY - r.top; stage.pointer.t = performance.now() / 1000; };
-    window.addEventListener('pointermove', move, { passive: true });
-    return () => window.removeEventListener('pointermove', move);
-  }, [stage]);
 
-  const cheer = (count = 3) => { for (let i = 0; i < count; i++) stage.hops.push(Math.floor(Math.random() * Math.max(n, 4))); };
   const fmt = (d) => d?.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const occT = OCC.find((o) => o.id === occ)?.t;
   const venueT = VENUES.find((v) => v.id === venue)?.t;
@@ -235,7 +225,7 @@ export default function Planner() {
     }
   };
   const pickDate = (d) => {
-    if (mode === 'pref') { setDate(d); setMode('alt'); cheer(2); } else { setAlt(d); }
+    if (mode === 'pref') { setDate(d); setMode('alt'); } else { setAlt(d); }
   };
   const submit = (e) => {
     e.preventDefault();
@@ -247,7 +237,6 @@ export default function Planner() {
     setErrors(er);
     if (Object.keys(er).length) { document.getElementById(`pl-${Object.keys(er)[0]}`)?.focus(); return; }
     setDone(true);
-    stage.celebrateAt = performance.now() / 1000;
   };
   const summaryText = () => [
     'YOUR PRIVATE VARNEY EXPERIENCE (event inquiry draft)', '',
@@ -276,18 +265,8 @@ export default function Planner() {
 
         <div className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-10">
           {/* the stage: venue backdrop + live crowd */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <div ref={stageEl} className="relative aspect-[5/4] w-full overflow-hidden rounded-[20px] [container-type:inline-size] sm:aspect-[16/11]">
-              <Backdrop venue={venue} occ={occ} />
-              <Crowd specs={specs} stage={stage} unit={0.78} className="absolute inset-0" />
-              <AnimatePresence>
-                {done && (
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.6, ease }} className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-off px-4 py-2 text-[0.9375rem] font-medium text-gra">
-                    <PartyPopper size={16} /> Inquiry ready
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+          <div className="[container-type:inline-size] lg:sticky lg:top-24 lg:self-start">
+            <Stage venue={venue} occ={occ} guests={guests} date={date} done={done} stageRef={stageEl} />
             <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Your party so far">
               {chips.map(([k, v]) => (
                 <li key={k} className={`rounded-[12px] px-3.5 py-3 transition-colors duration-500 ${v ? 'bg-lav text-gra' : 'bg-pur-2 text-lav'}`}>
@@ -323,7 +302,7 @@ export default function Planner() {
                         <fieldset>
                           <legend className="c3-head mb-5 text-[clamp(1.6rem,2.6vw,2.25rem)]">What are we celebrating?</legend>
                           <div className="grid gap-2.5 sm:grid-cols-2">
-                            {OCC.map((o) => <Choice key={o.id} active={occ === o.id} onClick={() => { setOcc(o.id); cheer(5); }} icon={o.icon} title={o.t} />)}
+                            {OCC.map((o) => <Choice key={o.id} active={occ === o.id} onClick={() => { setOcc(o.id); }} icon={o.icon} title={o.t} />)}
                           </div>
                         </fieldset>
                       )}
@@ -331,7 +310,7 @@ export default function Planner() {
                         <fieldset>
                           <legend className="c3-head mb-5 text-[clamp(1.6rem,2.6vw,2.25rem)]">Where would you like it?</legend>
                           <div className="grid gap-2.5">
-                            {VENUES.map((v) => <Choice key={v.id} big active={venue === v.id} onClick={() => { setVenue(v.id); cheer(3); }} icon={v.icon} title={v.t} note={v.note} />)}
+                            {VENUES.map((v) => <Choice key={v.id} big active={venue === v.id} onClick={() => { setVenue(v.id); }} icon={v.icon} title={v.t} note={v.note} />)}
                           </div>
                           <p className="mt-4 text-[0.9375rem] text-lav">Every location is confirmed by the practice before anything is booked.</p>
                         </fieldset>
@@ -341,7 +320,7 @@ export default function Planner() {
                           <legend className="c3-head mb-5 text-[clamp(1.6rem,2.6vw,2.25rem)]">How many guests?</legend>
                           <div className="grid grid-cols-2 gap-2.5">
                             {GUESTS.map((g, i) => (
-                              <button key={g.t} type="button" aria-pressed={guests === i} onClick={() => { setGuests(i); cheer(4); }}
+                              <button key={g.t} type="button" aria-pressed={guests === i} onClick={() => { setGuests(i); }}
                                 className={`rounded-[14px] p-4 text-left transition-[background-color,color,transform] duration-300 active:scale-[0.98] ${guests === i ? 'bg-cor text-gra' : 'bg-pur-2 text-off hover:-translate-y-0.5 hover:bg-pur-3'}`}>
                                 <span className="c3-display block text-[2.4rem]">{g.t}</span>
                                 <span className="mt-1 block text-[0.9375rem]">guests</span>
