@@ -62,7 +62,7 @@ function Loader({ onDone }) {
 /* ------------------------------------------------------------------ nav */
 function Nav() {
   const [open, setOpen] = useState(false);
-  const [shown, setShown] = useState(false);
+  const [shown, setShown] = useState(true);
   useEffect(() => {
     if (!window.__c2Loading) { setShown(true); return undefined; }
     const on = () => setShown(true);

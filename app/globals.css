@@ -118,3 +118,14 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; } /* Chrome, S
 .c2 { font-family: var(--font-c2); color: var(--c2-ink); }
 .c2-serif { font-family: var(--font-c2-serif); font-weight: 400; letter-spacing: -0.025em; word-spacing: normal; }
 @keyframes c2-shimmer { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+
+/* concept 2 hero: the first paint already matches the animation's start (no flash of the open photo) */
+.hx-clip {
+  --w: min(25vw, 400px);
+  --h: min(calc(var(--w) * 1.32), 50vh);
+  --t: 27vh;
+  opacity: 0;
+  clip-path: inset(var(--t) calc((100% - var(--w)) / 2) calc(100% - var(--t) - var(--h)) calc((100% - var(--w)) / 2) round calc(var(--w) / 2) calc(var(--w) / 2) 0 0);
+}
+@media (max-width: 767px) { .hx-clip { --w: 62vw; --t: 34vh; } }
+.hx-in, .hx-over > * { opacity: 0; }
