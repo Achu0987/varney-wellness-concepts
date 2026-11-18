@@ -103,13 +103,9 @@ function Nav() {
 }
 
 /* ------------------------------------------------------------------ hero: a crowd of real faces in depth; scrolling flies the camera through them */
-const FACES = [
-  // [image, screen x (vw), screen y (vh), depth z (px), on-screen width (vw)] at the first frame
-  ['p1', -34, -25, -200, 11], ['p2', 31, -27, -350, 10], ['w2', -31, 23, -500, 10], ['p7', 36, 25, -650, 11],
-  ['p8', -7, -32, -800, 8], ['p10', 9, 28, -900, 8], ['w4', -44, 2, -1000, 9], ['p6', 44, -4, -1100, 9],
-  ['p3', -17, -23, -1250, 7], ['p9', 20, 23, -1350, 7], ['w3', -31, 15, -1450, 7], ['p5', 29, -14, -1550, 6.5],
-  ['w1', 2, -21, -1650, 6], ['m1', -4, 22, -1750, 6],
-];
+// twelve real faces; screen slots are measured at runtime so none touches the nav, the headline or the screen edge
+const FACES = ['p1', 'p2', 'w2', 'p7', 'p8', 'p10', 'w4', 'p6', 'p3', 'p9', 'w3', 'p5'];
+const ZS = [-250, -1250, -550, -1500, -850, -1700, -400, -1100, -700, -1400, -1000, -1600];
 const PERSP = 1000;
 const depthK = (z) => (PERSP - z) / PERSP; // world size needed to look a given size at depth z
 const DEPTH = 2700; // the group photo sits this far back; the camera arrives at it at 78% of the scroll
@@ -125,7 +121,9 @@ function Hero() {
   const group = useRef(null);
   const groupImg = useRef(null);
   const outro = useRef(null);
-  const hint = useRef(null);
+  const mid = useRef(null);
+  const lines = useRef([]);
+  const slots = useRef([]);
 
   useEffect(() => {
     const el = root.current;
@@ -133,9 +131,10 @@ function Hero() {
     const fine = window.matchMedia('(pointer: fine)').matches;
     let vw = window.innerWidth; let vh = window.innerHeight;
     let mob = vw < 768;
-    let last = -1;
+    let last = -1; let lastP = 0;
 
     const render = (p) => {
+      lastP = p;
       if (Math.abs(p - last) < 0.0004) return;
       last = p;
       const dolly = easeInOut(clamp01(p / 0.78)) * DEPTH;
@@ -145,17 +144,20 @@ function Hero() {
       head.current.style.opacity = String(clamp01(1 - (hz - 250) / 450));
       intro.current.style.opacity = String(clamp01(1 - p / 0.06));
       intro.current.style.transform = `translate3d(0,${p * 160}px,0)`;
-      if (hint.current) hint.current.style.opacity = String(clamp01(1 - p / 0.03));
-      FACES.forEach(([, x, y, z, w], i) => {
+      const split = Math.min(dolly, 900) * 0.12;
+      if (lines.current[0]) lines.current[0].style.transform = `translate3d(${-split}px,0,0)`;
+      if (lines.current[1]) lines.current[1].style.transform = `translate3d(${split}px,0,0)`;
+      const fly = clamp01(dolly / 1400);
+      slots.current.forEach((sl, i) => {
         const c = cards.current[i];
-        if (!c) return;
+        if (!c || !sl) return;
+        const z = ZS[i];
         const wz = z + dolly;
-        const op = clamp01((wz + 2900) / 500) * clamp01((820 - wz) / 380);
+        const op = clamp01((820 - wz) / 380);
         c.style.opacity = String(op);
         c.style.visibility = op < 0.01 ? 'hidden' : 'visible';
         const k = depthK(z);
-        const yy = mob && y > 0 ? y * 0.6 : y;
-        c.style.transform = `translate3d(calc(${x * k}vw - 50%), calc(${yy * k}vh - 50%), ${wz}px)`;
+        c.style.transform = `translate3d(calc(${sl.x * k}px - 50%), calc(${sl.y * k}px - 50%), ${wz}px) rotate(${sl.rot + (sl.x < 0 ? -1 : 1) * 10 * fly}deg)`;
       });
       // the group photo arrives at z = 0, then opens to fill the whole screen
       const gz = -DEPTH + dolly;
@@ -166,18 +168,72 @@ function Hero() {
       group.current.style.opacity = String(clamp01((p - 0.22) / 0.18));
       group.current.style.borderRadius = `${(1 - open) * 18 / s}px`;
       groupImg.current.style.transform = `scale(${1.25 - 0.25 * open})`;
+      const mIn = clamp01((p - 0.36) / 0.08) * clamp01((0.74 - p) / 0.06);
+      mid.current.style.opacity = String(mIn);
+      mid.current.style.transform = `translate3d(0,${(0.55 - p) * 120}px,0)`;
       outro.current.style.opacity = String(clamp01((p - 0.88) / 0.07));
       outro.current.style.transform = `translate3d(0,${(1 - clamp01((p - 0.88) / 0.07)) * 40}px,0)`;
       outro.current.style.pointerEvents = p > 0.9 ? 'auto' : 'none';
     };
 
+    // measure the free space around the headline and lay the faces out in it
     const sizeCards = () => {
       vw = window.innerWidth; vh = window.innerHeight; mob = vw < 768;
-      FACES.forEach(([, , , z, w], i) => { const c = cards.current[i]; if (c) c.style.width = `${w * depthK(z) * (mob ? 1.6 : 1)}vw`; });
+      const spans = [...head.current.querySelectorAll('.c3-line > span')];
+      const tw = Math.max(...spans.map((n) => n.offsetWidth));
+      const th = head.current.offsetHeight;
+      const hc = vh * 0.48;
+      const navB = mob ? 74 : 92;
+      const introT = intro.current.offsetTop;
+      const g = mob ? 10 : 20;
+      const m = mob ? 12 : Math.max(24, vw * 0.035);
+      // keep the scattered look, but nudge every face clear of the nav, the headline and the screen edge
+      const top = navB + g; const bottom = introT - g;
+      const hb = { x0: vw / 2 - tw / 2 - g, x1: vw / 2 + tw / 2 + g, y0: hc - th / 2 - g, y1: hc + th / 2 + g };
+      // two mirrored fans of faces frame the headline: small near the middle, larger and tilted at the outside
+      const per = mob ? 3 : vw < 1100 ? 4 : 6;
+      const bandT = hb.y0 - top; const bandB = bottom - hb.y1;
+      const out = [];
+      const fan = (dir) => {
+        const band = dir < 0 ? bandT : bandB;
+        const hBase = Math.min(band, vh * (mob ? 0.17 : 0.27), ((vw - 2 * m) / per - (mob ? 8 : 16)) / (1.12 * 0.8));
+        const wMax = hBase * 1.12 * 0.8;
+        for (let i = 0; i < per; i++) {
+          const t = per === 1 ? 0.5 : i / (per - 1);
+          const u = Math.abs(2 * t - 1);
+          let h = hBase * (0.74 + 0.38 * u);
+          for (let tries = 0; tries < 6; tries++) {
+            const w = h * 0.8;
+            const cx = m + wMax / 2 + t * (vw - 2 * m - wMax);
+            // inner cards hug the band edge away from the headline; outer cards drift toward the headline's sides
+            const edge = dir < 0 ? top + h / 2 : bottom - h / 2;
+            const toward = dir < 0 ? hc - h * 0.15 : hc + h * 0.15;
+            let cy = edge + (toward - edge) * u * u * 0.85;
+            cy = dir < 0 ? Math.min(cy, hc - 10 - h / 2) : Math.max(cy, hc + 10 + h / 2);
+            const r = { x0: cx - w / 2, x1: cx + w / 2, y0: cy - h / 2, y1: cy + h / 2 };
+            if (r.x0 < hb.x1 && r.x1 > hb.x0 && r.y0 < hb.y1 && r.y1 > hb.y0) cy = dir < 0 ? Math.min(cy, hb.y0 - h / 2) : Math.max(cy, hb.y1 + h / 2);
+            if (cy - h / 2 >= top - 0.5 && cy + h / 2 <= bottom + 0.5) {
+              out.push({ x: cx - vw / 2, y: cy - vh / 2, w, rot: dir * -(2 * t - 1) * 7 });
+              break;
+            }
+            h *= 0.88;
+          }
+        }
+      };
+      fan(-1); fan(1);
+      // spread the depths so neighbours arrive at different moments
+      slots.current = FACES.map((_, i) => out[i] || null);
+      FACES.forEach((_, i) => {
+        const c = cards.current[i]; const sl = slots.current[i];
+        if (!c) return;
+        c.style.display = sl ? 'block' : 'none';
+        if (sl) c.style.width = `${sl.w * depthK(ZS[i])}px`;
+      });
       last = -1;
+      render(lastP);
     };
     sizeCards();
-    render(0);
+    document.fonts?.ready.then(sizeCards);
     window.addEventListener('resize', sizeCards);
 
     let st;
@@ -190,7 +246,7 @@ function Hero() {
     if (fine && !reduced) {
       rx = gsap.quickTo(tilt.current, 'rotationX', { duration: 1.2, ease: 'power3.out' });
       ry = gsap.quickTo(tilt.current, 'rotationY', { duration: 1.2, ease: 'power3.out' });
-      mv = (e) => { const nx = e.clientX / window.innerWidth - 0.5; const ny = e.clientY / window.innerHeight - 0.5; ry(nx * 9); rx(-ny * 7); };
+      mv = (e) => { const nx = e.clientX / window.innerWidth - 0.5; const ny = e.clientY / window.innerHeight - 0.5; ry(nx * 5); rx(-ny * 4); };
       window.addEventListener('pointermove', mv, { passive: true });
     }
     return () => { st?.kill(); window.removeEventListener('resize', sizeCards); if (mv) window.removeEventListener('pointermove', mv); };
@@ -204,14 +260,16 @@ function Hero() {
           <div className="absolute inset-0 bg-[#24212B]/45" />
         </div>
         <div ref={tilt} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          {FACES.map(([img], i) => (
-            <figure key={img} ref={(n) => { cards.current[i] = n; }} className="absolute left-1/2 top-1/2 m-0 overflow-hidden rounded-[14px] bg-lav-2 will-change-transform" style={{ aspectRatio: '4/5', width: '11vw' }}>
-              <img src={A(`/c3/${img}.jpg`)} alt="" decoding="async" fetchPriority={i < 4 ? 'high' : 'auto'} className="h-full w-full object-cover" draggable="false" />
+          {FACES.map((img, i) => (
+            <figure key={img} ref={(n) => { cards.current[i] = n; }} className="absolute left-1/2 top-1/2 m-0 will-change-transform" style={{ aspectRatio: '4/5', width: '11vw' }}>
+              <span className="c3-bob block h-full w-full overflow-hidden rounded-[16px] bg-lav-2 shadow-[0_18px_40px_-22px_rgba(56,32,107,0.55)]" style={{ animationDelay: `${-i * 0.73}s` }}>
+                <img src={A(`/c3/${img}.jpg`)} alt="" decoding="async" fetchPriority={i < 6 ? 'high' : 'auto'} className="h-full w-full object-cover" draggable="false" />
+              </span>
             </figure>
           ))}
-          <h1 ref={head} className="c3-display absolute left-1/2 top-[44%] m-0 w-[min(94vw,1400px)] text-center text-[clamp(2.75rem,13vw,6rem)] text-pur will-change-transform md:text-[min(10.6vw,17svh,10rem)] lg:text-[min(9.4vw,17svh,10rem)]" style={{ transform: 'translate3d(-50%,-50%,0)' }}>
-            <span className="c3-line"><span>Feel better.</span></span>
-            <span className="c3-line"><span>Live differently.</span></span>
+          <h1 ref={head} className="c3-display absolute left-1/2 top-[48%] z-10 m-0 w-[min(94vw,1400px)] text-center text-[clamp(2.75rem,13vw,6rem)] text-pur will-change-transform md:text-[min(10vw,15svh,10rem)] lg:text-[min(8.4vw,15svh,10rem)]" style={{ transform: 'translate3d(-50%,-50%,0)' }}>
+            <span className="c3-line"><span className="!inline-block"><span ref={(n) => { lines.current[0] = n; }} className="inline-block">Feel better.</span></span></span>
+            <span className="c3-line"><span className="!inline-block"><span ref={(n) => { lines.current[1] = n; }} className="inline-block">Live differently.</span></span></span>
           </h1>
         </div>
         <div ref={intro} className="absolute inset-x-0 bottom-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-5 px-[var(--m)] pb-7 md:flex-row md:items-end md:justify-between md:pb-9">
@@ -221,7 +279,9 @@ function Hero() {
             <a href="#parties" onClick={(e) => go(e, '#parties')} className="inline-flex min-h-[52px] items-center rounded-full bg-cor px-6 font-medium text-gra transition-transform hover:-translate-y-0.5">Plan a party</a>
           </div>
         </div>
-        <p ref={hint} className="absolute left-1/2 top-[66%] z-10 hidden -translate-x-1/2 text-[0.9375rem] text-[#5B5566] md:block" aria-hidden="true">Scroll to meet them</p>
+        <div ref={mid} className="pointer-events-none absolute inset-x-0 top-[12svh] z-10 px-[var(--m)] text-center opacity-0 motion-reduce:hidden" aria-hidden="true">
+          <p className="c3-display text-[clamp(2rem,5.4vw,5rem)] text-pur">Every face, <span className="text-cor">its own story.</span></p>
+        </div>
         <div ref={outro} className="absolute inset-0 z-20 motion-reduce:hidden flex flex-col items-start justify-end px-[var(--m)] pb-[12svh] text-off opacity-0" style={{ pointerEvents: 'none' }}>
           <div className="mx-auto w-full max-w-[1400px]">
             <p className="c3-display text-[clamp(2.2rem,6.2vw,6rem)]">Designed around <span className="block text-cor">real people.</span></p>

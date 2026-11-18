@@ -158,3 +158,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; } /* Chrome, S
   .c3-marquee { animation: none; }
 }
 .c3 h1, .c3 h2, .c3 h3, .c3 h4, .c3 legend { font-family: inherit; word-spacing: normal; }
+.c3-bob { animation: c3-bob 7s ease-in-out infinite; }
+@keyframes c3-bob { 0%, 100% { transform: translate3d(0, -5px, 0); } 50% { transform: translate3d(0, 6px, 0); } }
+@media (prefers-reduced-motion: reduce) { .c3-bob { animation: none; } }
