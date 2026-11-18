@@ -196,19 +196,26 @@ function Hero() {
       const out = [];
       const fan = (dir) => {
         const band = dir < 0 ? bandT : bandB;
-        const hBase = Math.min(band, vh * (mob ? 0.17 : 0.27), ((vw - 2 * m) / per - (mob ? 8 : 16)) / (1.12 * 0.8));
-        const wMax = hBase * 1.12 * 0.8;
+        // a deliberate big/small rhythm; top-left and bottom-right anchor the frame with the largest faces
+        const PAT = {
+          6: dir < 0 ? [1, 0.6, 0.86, 0.58, 0.94, 0.66] : [0.66, 0.95, 0.58, 0.86, 0.62, 1],
+          4: dir < 0 ? [1, 0.56, 0.86, 0.62] : [0.62, 0.9, 0.56, 1],
+          3: dir < 0 ? [0.95, 0.58, 0.8] : [0.78, 0.56, 1],
+        }[per];
+        const JIT = dir < 0 ? [0, 0.6, 0.12, 0.75, 0.05, 0.45] : [0.45, 0.05, 0.7, 0.1, 0.6, 0];
+        const hBase = Math.min(band, vh * (mob ? 0.2 : 0.31), ((vw - 2 * m) / per - (mob ? 8 : 16)) / (0.86 * 0.8));
+        const wMax = hBase * 0.8;
         for (let i = 0; i < per; i++) {
           const t = per === 1 ? 0.5 : i / (per - 1);
           const u = Math.abs(2 * t - 1);
-          let h = hBase * (0.74 + 0.38 * u);
+          let h = hBase * PAT[i];
           for (let tries = 0; tries < 6; tries++) {
             const w = h * 0.8;
             const cx = m + wMax / 2 + t * (vw - 2 * m - wMax);
             // inner cards hug the band edge away from the headline; outer cards drift toward the headline's sides
             const edge = dir < 0 ? top + h / 2 : bottom - h / 2;
             const toward = dir < 0 ? hc - h * 0.15 : hc + h * 0.15;
-            let cy = edge + (toward - edge) * u * u * 0.85;
+            let cy = edge + (dir < 0 ? 1 : -1) * Math.max(0, band - h) * JIT[i] + (PAT[i] > 0.85 ? (toward - edge) * u * u * 0.6 : 0);
             cy = dir < 0 ? Math.min(cy, hc - 10 - h / 2) : Math.max(cy, hc + 10 + h / 2);
             const r = { x0: cx - w / 2, x1: cx + w / 2, y0: cy - h / 2, y1: cy + h / 2 };
             if (r.x0 < hb.x1 && r.x1 > hb.x0 && r.y0 < hb.y1 && r.y1 > hb.y0) cy = dir < 0 ? Math.min(cy, hb.y0 - h / 2) : Math.max(cy, hb.y1 + h / 2);
