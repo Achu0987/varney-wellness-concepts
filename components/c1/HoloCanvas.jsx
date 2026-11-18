@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import * as THREE from 'three';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -69,7 +70,7 @@ function contourLines(pts, R) {
 
 /* A real chest X-ray (CC0, Wikimedia Commons) turned into a hologram: edges glow, soft tissue falls away. */
 function Xray({ xray }) {
-  const tex = useTexture('/images/xray.jpg');
+  const tex = useTexture(A('/images/xray.jpg'));
   const mat = useMemo(() => new THREE.ShaderMaterial({
     uniforms: { map: { value: tex }, px: { value: new THREE.Vector2(3 / 1280, 3 / 1464) }, k: { value: 1.7 }, t: { value: 0 }, c1: { value: ICE.clone() }, c2: { value: VIOLET.clone() } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',

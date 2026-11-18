@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -109,9 +110,9 @@ export function Marquee() {
 
 /* ------------------------------------------------------------------ 3. how it works: stacking cards */
 const STEPS = [
-  { n: '01', icon: MessageCircle, t: 'Meet your doctor', d: 'One unhurried conversation about your goals, your history and your pace. You leave understanding what happens next.', img: '/images/care1.jpg', tags: ['Unhurried', 'Personal'] },
-  { n: '02', icon: ClipboardList, t: 'Get your plan', d: 'A clear, personal care plan, written in plain language and shaped around your life rather than a template.', img: '/images/band.jpg', tags: ['Plain language', 'Built for you'] },
-  { n: '03', icon: CalendarCheck, t: 'Follow through', d: 'Check-ins and updates that keep everything connected, so your plan keeps moving with you.', img: '/images/care3.jpg', tags: ['Check-ins', 'Connected'] },
+  { n: '01', icon: MessageCircle, t: 'Meet your doctor', d: 'One unhurried conversation about your goals, your history and your pace. You leave understanding what happens next.', img: A('/images/care1.jpg'), tags: ['Unhurried', 'Personal'] },
+  { n: '02', icon: ClipboardList, t: 'Get your plan', d: 'A clear, personal care plan, written in plain language and shaped around your life rather than a template.', img: A('/images/band.jpg'), tags: ['Plain language', 'Built for you'] },
+  { n: '03', icon: CalendarCheck, t: 'Follow through', d: 'Check-ins and updates that keep everything connected, so your plan keeps moving with you.', img: A('/images/care3.jpg'), tags: ['Check-ins', 'Connected'] },
 ];
 export function Steps() {
   const root = useRef(null);
@@ -179,7 +180,7 @@ export function Expand() {
     <section ref={root} className="on-color relative h-[100svh] overflow-hidden">
       <p className="ex-small h-gs absolute inset-x-0 top-[9%] z-10 text-center text-[clamp(1.4rem,2.4vw,2rem)] text-white/80">Step inside</p>
       <div className="ex-frame absolute inset-0 overflow-hidden">
-        <img src="/images/band.jpg" alt="Calm, light-filled clinic interior with plants (stock photo placeholder)" className="ex-img absolute inset-0 h-full w-full object-cover" />
+        <img src={A('/images/band.jpg')} alt="Calm, light-filled clinic interior with plants (stock photo placeholder)" className="ex-img absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy/85 to-navy/10" />
       </div>
       <div className="relative z-10 flex h-full flex-col justify-end px-[var(--m)] pb-[10vh]">
@@ -194,10 +195,10 @@ export function Expand() {
 
 /* ------------------------------------------------------------------ 5. services: horizontal gallery */
 const SERVICES = [
-  { t: 'Personalized Wellness', img: '/images/care1.jpg' },
-  { t: 'Advanced Aesthetic Care', img: '/images/care2.jpg' },
-  { t: 'Health & Wellbeing', img: '/images/care3.jpg' },
-  { t: 'Your Wellness Journey', img: '/images/care4.jpg' },
+  { t: 'Personalized Wellness', img: A('/images/care1.jpg') },
+  { t: 'Advanced Aesthetic Care', img: A('/images/care2.jpg') },
+  { t: 'Health & Wellbeing', img: A('/images/care3.jpg') },
+  { t: 'Your Wellness Journey', img: A('/images/care4.jpg') },
 ];
 export function Services() {
   const root = useRef(null);
@@ -252,10 +253,10 @@ export function Services() {
 
 /* ------------------------------------------------------------------ 6. botox party: the photo follows your choice */
 const OCC = [
-  { t: 'Birthday', icon: Cake, img: '/images/p1.jpg', line: 'Raise a glass to another year.' },
-  { t: 'Bridal / Bachelorette', icon: Gem, img: '/images/p2.jpg', line: 'Before the big day, together.' },
-  { t: "Friends' gathering", icon: Users, img: '/images/p3.jpg', line: 'Your people, one afternoon.' },
-  { t: 'Private wellness event', icon: Flower2, img: '/images/p4.jpg', line: 'A calm, private occasion.' },
+  { t: 'Birthday', icon: Cake, img: A('/images/p1.jpg'), line: 'Raise a glass to another year.' },
+  { t: 'Bridal / Bachelorette', icon: Gem, img: A('/images/p2.jpg'), line: 'Before the big day, together.' },
+  { t: "Friends' gathering", icon: Users, img: A('/images/p3.jpg'), line: 'Your people, one afternoon.' },
+  { t: 'Private wellness event', icon: Flower2, img: A('/images/p4.jpg'), line: 'A calm, private occasion.' },
 ];
 const GUESTS = [['4–6', 5], ['7–10', 8], ['11–15', 12], ['16+', 16]];
 const VENUES = [['At the clinic', 'if available', Building2], ['Private residence', 'if approved', Home], ['Event venue', 'if approved', MapPin]];
@@ -387,7 +388,7 @@ export function Doctor() {
       <div className="mx-auto grid max-w-[1320px] items-center gap-10 md:grid-cols-[0.95fr_1.05fr] md:gap-20">
         <div className="relative">
           <div className="dr-frame relative aspect-[4/5] overflow-hidden rounded-[2rem]">
-            <img src="/images/doc.jpg" alt="Stock portrait placeholder (not Dr. Varney)" className="dr-img absolute inset-0 h-full w-full object-cover object-[50%_20%]" />
+            <img src={A('/images/doc.jpg')} alt="Stock portrait placeholder (not Dr. Varney)" className="dr-img absolute inset-0 h-full w-full object-cover object-[50%_20%]" />
           </div>
           <div className="absolute -bottom-5 -right-3 rounded-2xl bg-violet px-5 py-4 md:-right-8">
             <p className="text-[0.75rem] text-white/75">Led by</p>

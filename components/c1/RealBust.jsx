@@ -1,12 +1,13 @@
 'use client';
+import { A } from '@/lib/asset';
 import * as THREE from 'three';
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sparkles, useGLTF, useTexture } from '@react-three/drei';
 import { S } from '@/lib/c1/state';
 
-useGLTF.preload('/models/head.glb');
-useGLTF.preload('/models/skull.glb');
+useGLTF.preload(A('/models/head.glb'));
+useGLTF.preload(A('/models/skull.glb'));
 
 /** Pull the first mesh out of a GLB, bake its transform, centre it and scale it to a target height. */
 function useNormalised(url, height, { baseAtZero = true } = {}) {
@@ -37,9 +38,9 @@ const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a
  * Scrolling dissolves the skin to reveal the skull, then closes it again.
  */
 export default function RealBust({ mobile = false, bare = false, explode = 0, xray, glow: glowMode = false }) {
-  const head = useNormalised('/models/head.glb', HEAD_H);
-  const skull = useNormalised('/models/skull.glb', HEAD_H * 0.44, { baseAtZero: false });
-  const [color, normal, spec] = useTexture(['/models/head-color.jpg', '/models/head-normal.jpg', '/models/head-spec.jpg']);
+  const head = useNormalised(A('/models/head.glb'), HEAD_H);
+  const skull = useNormalised(A('/models/skull.glb'), HEAD_H * 0.44, { baseAtZero: false });
+  const [color, normal, spec] = useTexture([A('/models/head-color.jpg'), A('/models/head-normal.jpg'), A('/models/head-spec.jpg')]);
   const skin = useRef();
   const skullRef = useRef();
   const ring = useRef();

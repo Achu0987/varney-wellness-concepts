@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import gsap from 'gsap';
@@ -9,10 +10,10 @@ gsap.registerPlugin(ScrollTrigger);
 const MiniIcon = dynamic(() => import('./MiniIcon'), { ssr: false });
 
 const CARDS = [
-  { title: 'Personalized Wellness', kind: 'knot', color: '#8BDFFF', tone: 'glass', img: '/images/care1.jpg', tint: 'bg-ice/30' },
-  { title: 'Advanced Aesthetic Care', kind: 'gem', color: '#ffffff', tone: 'violet', img: '/images/care2.jpg', tint: 'bg-violet/60' },
-  { title: 'Health & Wellbeing', kind: 'gyro', color: '#7557FF', tone: 'ice', img: '/images/care3.jpg', tint: 'bg-ice/40' },
-  { title: 'Your Wellness Journey', kind: 'spiral', color: '#8BDFFF', tone: 'deep', img: '/images/care4.jpg', tint: 'bg-violet/40' },
+  { title: 'Personalized Wellness', kind: 'knot', color: '#8BDFFF', tone: 'glass', img: A('/images/care1.jpg'), tint: 'bg-ice/30' },
+  { title: 'Advanced Aesthetic Care', kind: 'gem', color: '#ffffff', tone: 'violet', img: A('/images/care2.jpg'), tint: 'bg-violet/60' },
+  { title: 'Health & Wellbeing', kind: 'gyro', color: '#7557FF', tone: 'ice', img: A('/images/care3.jpg'), tint: 'bg-ice/40' },
+  { title: 'Your Wellness Journey', kind: 'spiral', color: '#8BDFFF', tone: 'deep', img: A('/images/care4.jpg'), tint: 'bg-violet/40' },
 ];
 
 const TONES = {

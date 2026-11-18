@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -26,7 +27,7 @@ export default function FinalCta() {
 
   return (
     <section id="cta" data-chapter="Start here" ref={root} aria-labelledby="cta-title" className="relative flex min-h-[110svh] items-end px-[var(--m)] pb-[14svh] md:items-center md:pb-0">
-      <img src="/images/dark.jpg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-25 saturate-50" />
+      <img src={A('/images/dark.jpg')} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-25 saturate-50" />
       <div ref={flood} aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_75%_60%,rgba(117,87,255,0.55),rgba(8,14,32,0)_62%)] opacity-0" />
       <div className="relative z-10 max-w-[60rem]">
         <h2 id="cta-title" className="display text-[clamp(2rem,5.3vw,6.2rem)]">

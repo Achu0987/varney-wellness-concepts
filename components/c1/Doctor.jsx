@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useRef } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 
@@ -23,7 +24,7 @@ export default function Doctor() {
         >
           <motion.div style={{ y }} className="absolute inset-[-10%]">
             <motion.img
-              src="/images/doc.jpg" alt="Stock portrait placeholder for Dr. Joseph Varney (not him)"
+              src={A('/images/doc.jpg')} alt="Stock portrait placeholder for Dr. Joseph Varney (not him)"
               initial={{ scale: 1.35 }} animate={{ scale: seen ? 1 : 1.35 }} transition={{ duration: 1.8, ease }}
               className="h-full w-full object-cover object-[50%_20%] saturate-[0.9]"
             />

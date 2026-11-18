@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import * as THREE from 'three';
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -81,10 +82,10 @@ function buildScanLines(pts, R) {
   return g;
 }
 
-useGLTF.preload('/models/skull.glb');
+useGLTF.preload(A('/models/skull.glb'));
 
 function Skull() {
-  const { scene } = useGLTF('/models/skull.glb');
+  const { scene } = useGLTF(A('/models/skull.glb'));
   const geo = useMemo(() => {
     scene.updateMatrixWorld(true);
     let g = null;

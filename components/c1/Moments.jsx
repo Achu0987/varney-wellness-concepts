@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,10 +7,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const TILES = [
-  { img: '/images/p1.jpg', t: 'Birthday', cls: 'md:row-span-2', speed: -40 },
-  { img: '/images/p2.jpg', t: 'Bridal / Bachelorette', cls: '', speed: 30 },
-  { img: '/images/p3.jpg', t: 'Friends Gathering', cls: '', speed: -20 },
-  { img: '/images/p4.jpg', t: 'Private Wellness Event', cls: 'md:col-span-2', speed: 25, note: "Event inquiry only. Arrangements are subject to the practice's approval." },
+  { img: A('/images/p1.jpg'), t: 'Birthday', cls: 'md:row-span-2', speed: -40 },
+  { img: A('/images/p2.jpg'), t: 'Bridal / Bachelorette', cls: '', speed: 30 },
+  { img: A('/images/p3.jpg'), t: 'Friends Gathering', cls: '', speed: -20 },
+  { img: A('/images/p4.jpg'), t: 'Private Wellness Event', cls: 'md:col-span-2', speed: 25, note: "Event inquiry only. Arrangements are subject to the practice's approval." },
 ];
 
 /** Photo mosaic, each tile drifting at its own speed for depth. */

@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import * as THREE from 'three';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -21,8 +22,8 @@ export const TIERS = [
   { label: '16+', n: 16 },
 ];
 
-useGLTF.preload('/models/GlamVelvetSofa.glb');
-useGLTF.preload('/models/GlassHurricaneCandleHolder.glb');
+useGLTF.preload(A('/models/GlamVelvetSofa.glb'));
+useGLTF.preload(A('/models/GlassHurricaneCandleHolder.glb'));
 
 /** A real, licensed 3D model, normalised to a target height and set on the floor. */
 function Prop({ url, height, position, rotation = [0, 0, 0] }) {
@@ -160,11 +161,11 @@ export default function PartyScene({ occasion, tier, mobile }) {
         <Rig>
           <Centrepiece occasion={occasion} />
           <Suspense fallback={null}>
-            <Prop url="/models/GlamVelvetSofa.glb" height={1.15} position={[-3.4, -0.75, -2.7]} rotation={[0, 0.7, 0]} />
-            <Prop url="/models/GlamVelvetSofa.glb" height={1.15} position={[3.4, -0.75, -2.7]} rotation={[0, -0.7, 0]} />
-            <Prop url="/models/GlassHurricaneCandleHolder.glb" height={0.95} position={[-2.3, -0.75, 2.3]} />
-            <Prop url="/models/GlassHurricaneCandleHolder.glb" height={0.75} position={[2.5, -0.75, 2.0]} />
-            <Prop url="/models/GlassHurricaneCandleHolder.glb" height={0.6} position={[0.3, -0.75, 3.4]} />
+            <Prop url={A('/models/GlamVelvetSofa.glb')} height={1.15} position={[-3.4, -0.75, -2.7]} rotation={[0, 0.7, 0]} />
+            <Prop url={A('/models/GlamVelvetSofa.glb')} height={1.15} position={[3.4, -0.75, -2.7]} rotation={[0, -0.7, 0]} />
+            <Prop url={A('/models/GlassHurricaneCandleHolder.glb')} height={0.95} position={[-2.3, -0.75, 2.3]} />
+            <Prop url={A('/models/GlassHurricaneCandleHolder.glb')} height={0.75} position={[2.5, -0.75, 2.0]} />
+            <Prop url={A('/models/GlassHurricaneCandleHolder.glb')} height={0.6} position={[0.3, -0.75, 3.4]} />
           </Suspense>
           <Guests occasion={occasion} tier={tier} />
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.75, 0]}>

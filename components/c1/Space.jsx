@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -29,7 +30,7 @@ export default function Space() {
 
   return (
     <section id="space" data-chapter="How care works" ref={root} aria-labelledby="space-title" className="relative flex min-h-[110svh] flex-col justify-between overflow-hidden bg-[#080E20] px-[var(--m)] py-[14vh]">
-      <img ref={img} src="/images/band.jpg" alt="Calm, modern clinic interior with natural light and plants (stock photo placeholder)" className="absolute inset-0 h-full w-full object-cover brightness-[0.5] saturate-[0.8]" />
+      <img ref={img} src={A('/images/band.jpg')} alt="Calm, modern clinic interior with natural light and plants (stock photo placeholder)" className="absolute inset-0 h-full w-full object-cover brightness-[0.5] saturate-[0.8]" />
       <div aria-hidden="true" className="absolute inset-0 bg-[#7557FF]/25 mix-blend-soft-light" />
       <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,14,32,0.95),rgba(8,14,32,0)_70%)]" />
 

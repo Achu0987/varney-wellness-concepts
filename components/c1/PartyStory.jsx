@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,10 +12,10 @@ const spring = { type: 'spring', stiffness: 170, damping: 22 };
 const toast = (m) => window.dispatchEvent(new CustomEvent('vw-toast', { detail: m }));
 
 const OCC = [
-  { t: 'Birthday', icon: Cake, img: '/images/p1.jpg', line: 'Raise a glass to another year.' },
-  { t: 'Bridal / Bachelorette', icon: Gem, img: '/images/p2.jpg', line: 'Before the big day, together.' },
-  { t: "Friends' gathering", icon: Users, img: '/images/p3.jpg', line: 'Your people, one afternoon.' },
-  { t: 'Private wellness event', icon: Flower2, img: '/images/p4.jpg', line: 'A calm, private occasion.' },
+  { t: 'Birthday', icon: Cake, img: A('/images/p1.jpg'), line: 'Raise a glass to another year.' },
+  { t: 'Bridal / Bachelorette', icon: Gem, img: A('/images/p2.jpg'), line: 'Before the big day, together.' },
+  { t: "Friends' gathering", icon: Users, img: A('/images/p3.jpg'), line: 'Your people, one afternoon.' },
+  { t: 'Private wellness event', icon: Flower2, img: A('/images/p4.jpg'), line: 'A calm, private occasion.' },
 ];
 const GUESTS = [['4–6', 5], ['7–10', 8], ['11–15', 12], ['16+', 16]];
 const VENUES = [['At the clinic', 'if available', Building2], ['Private residence', 'if approved', Home], ['Event venue', 'if approved', MapPin]];

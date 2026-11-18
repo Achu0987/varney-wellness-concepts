@@ -13,3 +13,6 @@ public/preview/
 public/stock/
 
 .vercel
+
+.hallmark/
+out/

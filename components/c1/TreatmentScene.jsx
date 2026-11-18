@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import * as THREE from 'three';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -16,7 +17,7 @@ export const ZONES = [
 ];
 
 function useHead() {
-  const { scene } = useGLTF('/models/head.glb');
+  const { scene } = useGLTF(A('/models/head.glb'));
   return useMemo(() => {
     scene.updateMatrixWorld(true);
     let g = null;
@@ -38,7 +39,7 @@ function Head({ active, onPick, overlay }) {
   const { camera, gl } = useThree();
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const geo = useHead();
-  const [color, normal] = useTexture(['/models/head-color.jpg', '/models/head-normal.jpg']);
+  const [color, normal] = useTexture([A('/models/head-color.jpg'), A('/models/head-normal.jpg')]);
   useMemo(() => { color.colorSpace = THREE.SRGBColorSpace; color.anisotropy = 8; normal.anisotropy = 8; }, [color, normal]);
   const group = useRef();
   const mesh = useRef();

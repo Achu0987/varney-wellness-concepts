@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -10,10 +11,10 @@ const ease = [0.22, 1, 0.36, 1];
 const toast = (m) => window.dispatchEvent(new CustomEvent('vw-toast', { detail: m }));
 
 const OCC = [
-  { t: 'Birthday', img: '/images/p1.jpg' },
-  { t: 'Bridal / Bachelorette', img: '/images/p2.jpg' },
-  { t: "Friends' gathering", img: '/images/p3.jpg' },
-  { t: 'Private wellness event', img: '/images/p4.jpg' },
+  { t: 'Birthday', img: A('/images/p1.jpg') },
+  { t: 'Bridal / Bachelorette', img: A('/images/p2.jpg') },
+  { t: "Friends' gathering", img: A('/images/p3.jpg') },
+  { t: 'Private wellness event', img: A('/images/p4.jpg') },
 ];
 const GUESTS = ['4–6', '7–10', '11–15', '16+'];
 const VENUES = ['at the clinic', 'at a private residence', 'at an event venue'];

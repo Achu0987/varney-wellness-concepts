@@ -1,4 +1,5 @@
 'use client';
+import { A } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import gsap from 'gsap';
@@ -170,10 +171,10 @@ function Hero({ ready }) {
     <section id="top" ref={heroRef} className="p-2.5 md:p-4">
       <div className="relative flex min-h-[min(calc(100svh-2rem),900px)] flex-col overflow-hidden rounded-[1.75rem] bg-violet-deep md:rounded-[2.25rem]">
         {/* real doctor photo behind the hologram (stock placeholder) */}
-        <img src="/images/doc.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover object-[50%_30%] opacity-[0.18] blur-[2px] mix-blend-luminosity" />
+        <img src={A('/images/doc.jpg')} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover object-[50%_30%] opacity-[0.18] blur-[2px] mix-blend-luminosity" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-navy/30" />
         {/* the same photo, clear and in colour, on arrival */}
-        <img src="/images/doc.jpg" alt="" aria-hidden="true" className="hero-clear pointer-events-none absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
+        <img src={A('/images/doc.jpg')} alt="" aria-hidden="true" className="hero-clear pointer-events-none absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
         <div aria-hidden="true" className="hero-scrim pointer-events-none absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/10 to-navy/85" />
         {/* nav: fixed to the viewport; over the hero it sits in the green, once scrolled it becomes a white bar */}
         <div aria-hidden="true" className="h-[88px] shrink-0 md:h-[104px]" />
@@ -280,7 +281,7 @@ function How() {
         </div>
         <div className="mt-14 grid gap-5 md:grid-cols-[1fr_1.3fr]">
           <Reveal className="relative min-h-[22rem] overflow-hidden rounded-[1.8rem]">
-            <img src="/images/band.jpg" alt="Bright, calm clinic interior with plants (stock photo placeholder)" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={A('/images/band.jpg')} alt="Bright, calm clinic interior with plants (stock photo placeholder)" className="absolute inset-0 h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy/65" />
             <p className="absolute bottom-5 left-5 rounded-full bg-white/85 px-4 py-2 text-[0.85rem] font-medium text-navy">Stock photo placeholder</p>
           </Reveal>
@@ -353,10 +354,10 @@ function Story() {
 
 /* ------------------------------------------------------------------ services */
 const SERVICES = [
-  ['Personalized Wellness', '/images/care1.jpg', '#0E2340'],
-  ['Advanced Aesthetic Care', '/images/care2.jpg', '#1C1752'],
-  ['Health & Wellbeing', '/images/care3.jpg', '#111A3A'],
-  ['Your Wellness Journey', '/images/care4.jpg', '#13213B'],
+  ['Personalized Wellness', A('/images/care1.jpg'), '#0E2340'],
+  ['Advanced Aesthetic Care', A('/images/care2.jpg'), '#1C1752'],
+  ['Health & Wellbeing', A('/images/care3.jpg'), '#111A3A'],
+  ['Your Wellness Journey', A('/images/care4.jpg'), '#13213B'],
 ];
 function Services() {
   return (
@@ -406,9 +407,9 @@ function Party() {
           <Reveal><h2 className="h-gs mt-6 text-[clamp(2rem,4vw,3.8rem)] leading-[1.04]">Your people.<br />Your occasion.<br /><span className="text-ice">Your private experience.</span></h2></Reveal>
           <Reveal><p className="mt-5 max-w-[44ch] text-white/65">Plan a private gathering with Dr. Varney's team in three quick steps. This is a homepage preview: nothing is booked or sent.</p></Reveal>
           <div className="mt-8 grid grid-cols-[1.2fr_1fr] gap-3">
-            <Reveal className="row-span-2 overflow-hidden rounded-[1.4rem]"><img src="/images/p1.jpg" alt="Friends raising glasses together (stock photo)" className="h-full min-h-[18rem] w-full object-cover" /></Reveal>
-            <Reveal className="overflow-hidden rounded-[1.4rem]"><img src="/images/p2.jpg" alt="" className="h-full max-h-[9rem] w-full object-cover" /></Reveal>
-            <Reveal className="overflow-hidden rounded-[1.4rem]"><img src="/images/p3.jpg" alt="" className="h-full max-h-[9rem] w-full object-cover" /></Reveal>
+            <Reveal className="row-span-2 overflow-hidden rounded-[1.4rem]"><img src={A('/images/p1.jpg')} alt="Friends raising glasses together (stock photo)" className="h-full min-h-[18rem] w-full object-cover" /></Reveal>
+            <Reveal className="overflow-hidden rounded-[1.4rem]"><img src={A('/images/p2.jpg')} alt="" className="h-full max-h-[9rem] w-full object-cover" /></Reveal>
+            <Reveal className="overflow-hidden rounded-[1.4rem]"><img src={A('/images/p3.jpg')} alt="" className="h-full max-h-[9rem] w-full object-cover" /></Reveal>
           </div>
         </div>
 
@@ -485,7 +486,7 @@ function Doctor() {
       <div className="mx-auto grid max-w-[1320px] items-center gap-10 md:grid-cols-[0.9fr_1.1fr] md:gap-16">
         <Reveal className="relative">
           <div className="overflow-hidden rounded-[2rem] rounded-t-[12rem] bg-violet-deep">
-            <motion.img initial={{ scale: 1.15 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease }} src="/images/doc.jpg" alt="Stock portrait placeholder (not Dr. Varney)" className="aspect-[4/5] w-full object-cover object-[50%_20%]" />
+            <motion.img initial={{ scale: 1.15 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease }} src={A('/images/doc.jpg')} alt="Stock portrait placeholder (not Dr. Varney)" className="aspect-[4/5] w-full object-cover object-[50%_20%]" />
           </div>
           <p className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-2 text-[0.85rem] font-medium text-navy">Stock placeholder, not Dr. Varney</p>
         </Reveal>
