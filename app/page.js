@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'system-ui, sans-serif' }}>
       <p>
-        <a href={`${BASE}/concept-1/`}>Concept 01</a> &nbsp;|&nbsp; <a href={`${BASE}/concept-2/`}>Concept 02</a>
+        <a href={`${BASE}/concept-1/`}>Concept 01</a> &nbsp;|&nbsp; <a href={`${BASE}/concept-2/`}>Concept 02</a> &nbsp;|&nbsp; <a href={`${BASE}/concept-3/`}>Concept 03</a>
       </p>
     </main>
   );
