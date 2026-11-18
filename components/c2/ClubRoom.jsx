@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { ContactShadows, Environment, useGLTF, useTexture } from '@react-three/drei';
-import { EffectComposer, DepthOfField, Vignette } from '@react-three/postprocessing';
 
 /*
   Inside the club: a walk through one photoreal room, driven by scroll.
@@ -153,13 +152,22 @@ function Walk({ progress, focus }) {
 
 export default function ClubRoom({ progress, className = '' }) {
   const [desk, setDesk] = useState(true);
+  const [on, setOn] = useState(false);
+  const wrap = useRef(null);
   const focus = useRef(new THREE.Vector3(0, 1.2, -4));
   useEffect(() => { setDesk(window.innerWidth >= 900); }, []);
+  // only draw while the room is on screen
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { rootMargin: '120px' });
+    if (wrap.current) io.observe(wrap.current);
+    return () => io.disconnect();
+  }, []);
   return (
-    <div className={className} aria-hidden="true">
+    <div ref={wrap} className={className} aria-hidden="true">
       <Canvas
-        dpr={[1, desk ? 1.6 : 1.3]}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
+        frameloop={on ? 'always' : 'never'}
+        dpr={[1, desk ? 1.25 : 1.1]}
+        gl={{ antialias: desk, powerPreference: 'high-performance', toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
         camera={{ fov: desk ? 40 : 55, near: 0.05, far: 60, position: POS[0].toArray() }}
       >
         <color attach="background" args={['#EFE8DC']} />
@@ -170,12 +178,6 @@ export default function ClubRoom({ progress, className = '' }) {
           <Room />
         </Suspense>
         <Walk progress={progress} focus={focus} />
-        {desk && (
-          <EffectComposer multisampling={0}>
-            <DepthOfField target={focus.current} focalLength={0.03} bokehScale={2.2} height={480} />
-            <Vignette eskil={false} offset={0.22} darkness={0.55} />
-          </EffectComposer>
-        )}
       </Canvas>
     </div>
   );

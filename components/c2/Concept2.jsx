@@ -136,7 +136,7 @@ function Hero() {
       };
       if (window.__c2Loading) window.addEventListener('c2-entered', intro, { once: true }); else intro();
       if (reduced) return;
-      const tl = gsap.timeline({ scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom bottom', scrub: 0.8, invalidateOnRefresh: true } });
+      const tl = gsap.timeline({ scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom bottom', scrub: 0.3, invalidateOnRefresh: true } });
       tl.fromTo('.hx-clip', { clipPath: start }, { clipPath: 'inset(0px 0px 0px 0px round 0px 0px 0px 0px)', ease: 'power2.inOut', duration: 1 }, 0)
         .fromTo('.hx-img', { scale: 1.35 }, { scale: 1.04, ease: 'none', duration: 1.6 }, 0)
         .to('.hx-l1', { yPercent: -140, opacity: 0, ease: 'power2.in', duration: 0.7 }, 0)
@@ -157,7 +157,7 @@ function Hero() {
         </h1>
         {/* the real photograph, clipped to the arch */}
         <div className="hx-clip absolute inset-0 z-0 overflow-hidden">
-          <img src={A('/c2/pool.jpg')} alt="A calm indoor pool with tall windows onto trees (stock placeholder)" className="hx-img h-full w-full object-cover" />
+          <img src={A('/c2/pool.jpg')} alt="A calm indoor pool with tall windows onto trees (stock placeholder)" className="hx-img h-full w-full object-cover will-change-transform" fetchPriority="high" />
           <div className="hx-scrim absolute inset-0 bg-[linear-gradient(0deg,rgba(10,30,26,0.72),rgba(10,30,26,0.15)_55%,rgba(10,30,26,0.25))] opacity-0" />
         </div>
         {/* side notes, desktop */}
@@ -216,10 +216,10 @@ function Statement() {
         </div>
         <div className="relative h-[34rem]">
           <div className="st-par absolute left-0 top-0 w-[62%]" data-from="10" data-to="-12">
-            <div className="st-mask aspect-[3/4] overflow-hidden rounded-t-full"><img src={A('/c2/towel.jpg')} alt="Woman in a calm, natural-light setting (stock photo)" className="h-full w-full object-cover" /></div>
+            <div className="st-mask aspect-[3/4] overflow-hidden rounded-t-full"><img loading="lazy" decoding="async" src={A('/c2/towel.jpg')} alt="Woman in a calm, natural-light setting (stock photo)" className="h-full w-full object-cover" /></div>
           </div>
           <div className="st-par absolute bottom-0 right-0 w-[52%]" data-from="25" data-to="-25">
-            <div className="st-mask aspect-[3/4] overflow-hidden rounded-t-full"><img src={A('/c2/serum.jpg')} alt="" className="h-full w-full object-cover" /></div>
+            <div className="st-mask aspect-[3/4] overflow-hidden rounded-t-full"><img loading="lazy" decoding="async" src={A('/c2/serum.jpg')} alt="" className="h-full w-full object-cover" /></div>
           </div>
         </div>
       </div>
@@ -241,7 +241,7 @@ function Experience() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const ctx = gsap.context(() => {
       const dist = () => track.current.scrollWidth - window.innerWidth;
-      const move = gsap.to(track.current, { x: () => -dist(), ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: () => `+=${dist()}`, scrub: 0.8, pin: true, invalidateOnRefresh: true } });
+      const move = gsap.to(track.current, { x: () => -dist(), ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: () => `+=${dist()}`, scrub: 0.3, pin: true, invalidateOnRefresh: true } });
       gsap.utils.toArray('.xp-card').forEach((card) => {
         gsap.fromTo(card.querySelector('.xp-img'), { xPercent: -10, scale: 1.15 }, { xPercent: 10, scale: 1.15, ease: 'none', scrollTrigger: { trigger: card, containerAnimation: move, start: 'left right', end: 'right left', scrub: true } });
         gsap.fromTo(card.querySelectorAll('.xp-in'), { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: card, containerAnimation: move, start: 'left 70%', end: 'left 35%', scrub: true } });
@@ -261,7 +261,7 @@ function Experience() {
           </div>
           {CHAPTERS.map((c) => (
             <article key={c.t} className="xp-card relative h-[72svh] w-[80vw] shrink-0 overflow-hidden rounded-[2rem] md:h-[76svh] md:w-[44vw]">
-              <img src={c.img} alt="" className="xp-img absolute inset-0 h-full w-full object-cover" style={{ objectPosition: c.pos }} />
+              <img loading="lazy" decoding="async" src={c.img} alt="" className="xp-img absolute inset-0 h-full w-full object-cover" style={{ objectPosition: c.pos }} />
               <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(10,30,26,0.78),rgba(10,30,26,0)_55%)]" />
               <div className="absolute inset-x-7 bottom-7 text-[#F7F3EC] md:inset-x-10 md:bottom-10">
                 <h3 className="xp-in c2-serif text-[clamp(2.6rem,4.6vw,4.8rem)] leading-none">{c.t}</h3>
@@ -291,6 +291,12 @@ const smoothstep = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) /
 
 function InsideClub() {
   const root = useRef(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); io.disconnect(); } }, { rootMargin: '150% 0px' });
+    if (root.current) io.observe(root.current);
+    return () => io.disconnect();
+  }, []);
   const progress = useRef(0);
   const texts = useRef([]);
   const bar = useRef(null);
@@ -317,7 +323,8 @@ function InsideClub() {
   return (
     <section id="lounge" ref={root} className="relative h-[620vh] bg-[#EFE8DC]" aria-label="Inside the club">
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        <ClubRoom progress={progress} className="absolute inset-0" />
+        {near && <ClubRoom progress={progress} className="absolute inset-0" />}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_55%,rgba(0,0,0,0.38))]" />
         {/* soft scrim so the words always read */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-full bg-[linear-gradient(90deg,rgba(10,30,26,0.55),rgba(10,30,26,0)_55%)] md:w-[70%]" />
         {ROOM_STOPS.map((st, i) => (
@@ -387,7 +394,7 @@ function Services() {
         <AnimatePresence>
           {hover > -1 && (
             <motion.div key={hover} initial={{ opacity: 0, scale: 0.85, rotate: -4 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.5, ease }} className="h-80 w-64 overflow-hidden rounded-t-full shadow-2xl">
-              <img src={SERVICES[hover].img} alt="" className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={SERVICES[hover].img} alt="" className="h-full w-full object-cover" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -401,7 +408,7 @@ function Doctor() {
   const root = useRef(null);
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.dr-arch', { clipPath: 'inset(100% 0 0 0 round 999px 999px 0 0)' }, { clipPath: 'inset(0% 0 0 0 round 999px 999px 0 0)', ease: 'none', scrollTrigger: { trigger: root.current, start: 'top 80%', end: 'top 25%', scrub: 0.6 } });
+      gsap.fromTo('.dr-arch', { clipPath: 'inset(100% 0 0 0 round 999px 999px 0 0)' }, { clipPath: 'inset(0% 0 0 0 round 999px 999px 0 0)', ease: 'none', scrollTrigger: { trigger: root.current, start: 'top 80%', end: 'top 25%', scrub: 0.3 } });
       gsap.fromTo('.dr-img', { scale: 1.3 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top 80%', end: 'bottom top', scrub: true } });
       gsap.from('.dr-in', { y: 40, opacity: 0, stagger: 0.12, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: root.current, start: 'top 60%' } });
     }, root);
@@ -411,7 +418,7 @@ function Doctor() {
     <section id="doctor" ref={root} className="relative bg-[#F7F3EC] px-[var(--m)] py-28 md:py-36">
       <div className="mx-auto grid max-w-[1360px] items-center gap-14 md:grid-cols-[0.85fr_1.15fr] md:gap-24">
         <div className="relative max-md:order-2">
-          <figure className="dr-arch relative m-0 aspect-[3/4] overflow-hidden rounded-t-full"><img src={A('/images/doc.jpg')} alt="Stock portrait placeholder (not Dr. Varney)" className="dr-img h-full w-full object-cover object-[50%_20%]" /></figure>
+          <figure className="dr-arch relative m-0 aspect-[3/4] overflow-hidden rounded-t-full"><img loading="lazy" decoding="async" src={A('/images/doc.jpg')} alt="Stock portrait placeholder (not Dr. Varney)" className="dr-img h-full w-full object-cover object-[50%_20%]" /></figure>
           <p className="mt-3 text-[0.8125rem] text-[#242424]/55">Stock placeholder, not Dr. Varney</p>
         </div>
         <div>
@@ -483,7 +490,7 @@ export default function Concept2() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let lenis; let tick;
     if (!reduced) {
-      lenis = new Lenis({ lerp: 0.075 });
+      lenis = new Lenis({ lerp: 0.14, wheelMultiplier: 1, smoothWheel: true });
       if (window.__c2Loading) lenis.stop();
       window.__lenis = lenis;
       lenis.on('scroll', ScrollTrigger.update);

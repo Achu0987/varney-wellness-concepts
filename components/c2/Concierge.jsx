@@ -99,10 +99,10 @@ export default function Concierge() {
       gsap.from('.cc-fade', { y: 40, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.cc-intro', start: 'top 60%' } });
       gsap.from('.cc-how > li', { y: 50, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.cc-how', start: 'top 85%' } });
       gsap.fromTo('.cc-how-line', { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.cc-how', start: 'top 85%', end: 'top 45%', scrub: true } });
-      gsap.fromTo('.cc-hero-arch', { clipPath: 'inset(100% 0 0 0 round 999px 999px 0 0)' }, { clipPath: 'inset(0% 0 0 0 round 999px 999px 0 0)', ease: 'power2.out', scrollTrigger: { trigger: '.cc-intro', start: 'top 75%', end: 'center 55%', scrub: 0.8 } });
+      gsap.fromTo('.cc-hero-arch', { clipPath: 'inset(100% 0 0 0 round 999px 999px 0 0)' }, { clipPath: 'inset(0% 0 0 0 round 999px 999px 0 0)', ease: 'power2.out', scrollTrigger: { trigger: '.cc-intro', start: 'top 75%', end: 'center 55%', scrub: 0.3 } });
       gsap.fromTo('.cc-hero-img', { scale: 1.3 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.cc-intro', start: 'top bottom', end: 'bottom top', scrub: true } });
       // the invitation arrives tilted, like a card being set down
-      gsap.fromTo('.cc-card', { rotateX: 18, y: 80, opacity: 0 }, { rotateX: 0, y: 0, opacity: 1, ease: 'power3.out', scrollTrigger: { trigger: '.cc-planner', start: 'top 80%', end: 'top 35%', scrub: 0.8 } });
+      gsap.fromTo('.cc-card', { rotateX: 18, y: 80, opacity: 0 }, { rotateX: 0, y: 0, opacity: 1, ease: 'power3.out', scrollTrigger: { trigger: '.cc-planner', start: 'top 80%', end: 'top 35%', scrub: 0.3 } });
       // each question rises in, then its options follow one by one
       panels.current.forEach((el) => {
         if (!el) return;
@@ -146,7 +146,7 @@ export default function Concierge() {
             </button>
           </div>
           <div className="cc-hero-arch relative mx-auto hidden aspect-[3/4] w-full max-w-[24rem] overflow-hidden rounded-t-full lg:block">
-            <img src={A('/images/p3.jpg')} alt="Friends raising glasses at a celebration (stock placeholder)" className="cc-hero-img h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={A('/images/p3.jpg')} alt="Friends raising glasses at a celebration (stock placeholder)" className="cc-hero-img h-full w-full object-cover" />
           </div>
         </div>
 
@@ -177,7 +177,7 @@ export default function Concierge() {
                 {OCC.map((o, i) => (
                   <button key={o.t} type="button" role="radio" aria-checked={occ === i} onClick={() => choose(setOcc, i, 1)} className="cc-opt group text-left">
                     <span className={`relative block aspect-[3/4] overflow-hidden rounded-t-full transition-[opacity,transform] duration-500 ${occ === i ? 'outline outline-2 outline-offset-4 outline-[#C5A77B]' : 'opacity-80 hover:-translate-y-1 hover:opacity-100'}`}>
-                      <img src={o.img} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1.2s] group-hover:scale-110" />
+                      <img loading="lazy" decoding="async" src={o.img} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1.2s] group-hover:scale-110" />
                       <span className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,0,0,0.55),rgba(0,0,0,0)_55%)]" />
                       <span className="absolute inset-x-3 bottom-3 text-[1rem] leading-tight text-[#F7F3EC]">{o.t}</span>
                       {occ === i && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute right-3 top-[34%] grid h-8 w-8 place-items-center rounded-full bg-[#C5A77B] text-[#173B35]"><Check size={16} /></motion.span>}
@@ -271,7 +271,7 @@ export default function Concierge() {
                   <div className="relative rounded-[0.35rem] bg-[#efe8db] px-8 py-10 text-center">
                     <AnimatePresence mode="wait">
                       <motion.div key={occ} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.6, ease }} className="mx-auto mb-6 h-32 w-24 overflow-hidden rounded-t-full">
-                        <img src={OCC[occ].img} alt="" className="h-full w-full object-cover" />
+                        <img loading="lazy" decoding="async" src={OCC[occ].img} alt="" className="h-full w-full object-cover" />
                       </motion.div>
                     </AnimatePresence>
                     <p className="c2-serif text-[1.3rem] text-[#173B35]">The Varney private experience</p>
