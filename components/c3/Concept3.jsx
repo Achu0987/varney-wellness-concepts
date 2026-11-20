@@ -501,45 +501,88 @@ function Moments() {
   );
 }
 
-/* ------------------------------------------------------------------ visits: accordion of tinted panels */
+/* ------------------------------------------------------------------ visits: five tinted panels; on desktop the scroll opens them one after another */
 const VISITS = [
-  { t: 'Talk', c: 'bg-pur text-off', p: 'Start with a relaxed conversation about what you want to change and why it matters to you.', img: A('/c3/doorway.jpg'), alt: 'A guest being welcomed at a door (stock photo)' },
-  { t: 'Assess', c: 'bg-pur-2 text-off', p: 'A medical assessment, so every recommendation is safe and suitable for you.' },
-  { t: 'Plan', c: 'bg-pur-3 text-off', p: 'Options explained plainly, including doing nothing. You decide, with no pressure.' },
-  { t: 'Care', c: 'bg-lav-3 text-gra', p: 'Treatment or support delivered by the physician-led team, at a pace that suits you.' },
-  { t: 'Check in', c: 'bg-lav-2 text-gra', p: 'Follow-up whenever you need it, so the plan keeps fitting your life.' },
+  { t: 'Talk', c: 'bg-pur text-off', p: 'Start with a relaxed conversation about what you want to change and why it matters to you.', img: A('/c3/doorway.jpg'), alt: 'A guest being welcomed at a door (stock photo)', pos: '72% 50%' },
+  { t: 'Assess', c: 'bg-pur-2 text-off', p: 'A medical assessment, so every recommendation is safe and suitable for you.', img: A('/c3/v-clinic2.jpg'), alt: 'A bright, calm waiting room (stock photo)' },
+  { t: 'Plan', c: 'bg-pur-3 text-off', p: 'Options explained plainly, including doing nothing. You decide, with no pressure.', img: A('/c3/twowomen.jpg'), alt: 'Two friends smiling outdoors (stock photo)' },
+  { t: 'Care', c: 'bg-lav-3 text-gra', p: 'Treatment or support delivered by the physician-led team, at a pace that suits you.', img: A('/c3/m3.jpg'), alt: 'A smiling man in a white t-shirt (stock photo)' },
+  { t: 'Check in', c: 'bg-lav-2 text-gra', p: 'Follow-up whenever you need it, so the plan keeps fitting your life.', img: A('/c3/laugh4.jpg'), alt: 'Friends laughing together in the sun (stock photo)' },
 ];
 function Visits() {
   const [open, setOpen] = useState(0);
+  const root = useRef(null);
+  const bar = useRef(null);
+  useEffect(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+      let cur = 0;
+      const st = ScrollTrigger.create({
+        trigger: root.current, start: 'top top', end: 'bottom bottom',
+        onUpdate: (t) => {
+          const k = Math.min(VISITS.length - 1, Math.floor(t.progress * VISITS.length));
+          if (k !== cur) { cur = k; setOpen(k); }
+          if (bar.current) bar.current.style.transform = `scaleX(${t.progress})`;
+        },
+      });
+      return () => st.kill();
+    });
+    return () => mm.revert();
+  }, []);
+  const pick = (k) => {
+    const el = root.current;
+    if (window.innerWidth >= 1024 && window.__lenis && el && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const y = el.offsetTop + ((el.offsetHeight - window.innerHeight) * (k + 0.5)) / VISITS.length;
+      window.__lenis.scrollTo(y, { duration: 1 });
+    } else setOpen(k);
+  };
   return (
-    <section id="visits" className="bg-off px-[var(--m)] py-24 md:py-32">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="grid gap-6 md:grid-cols-12">
-          <h2 className="c3-display text-[clamp(2.4rem,4.6vw,4.4rem)] text-pur md:col-span-6" data-reveal>How a visit <br />works</h2>
-          <p className="max-w-[40ch] text-[1.125rem] md:col-span-5 md:col-start-8 md:self-end" data-reveal="0.1">Five simple stages, the same whether you come for one treatment or a long-term plan. Illustrative; the practice confirms its own process.</p>
-        </div>
-        <div className="mt-14 flex flex-col gap-2 md:h-[520px] md:flex-row md:gap-0 md:overflow-hidden md:rounded-[14px]" data-reveal="0.15">
-          {VISITS.map((v, i) => {
-            const on = open === i;
-            return (
-              <div key={v.t} className={`relative overflow-hidden rounded-[14px] md:rounded-none ${v.c} max-md:!flex-none transition-[flex-grow] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]`} style={{ flexGrow: on ? 7 : 1, flexBasis: 0 }}>
-                <button type="button" onClick={() => setOpen(i)} aria-expanded={on} className="flex h-16 w-full items-center gap-3 px-5 text-left md:absolute md:inset-0 md:h-full md:items-end md:p-6">
-                  <span className={`text-[1.125rem] font-bold md:text-[1.25rem] ${on ? 'md:hidden' : 'md:[writing-mode:vertical-rl] md:rotate-180'}`}>{v.t}</span>
-                </button>
-                <div className={`grid transition-[grid-template-rows] duration-500 md:absolute md:inset-0 md:block ${on ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] md:hidden'}`}>
-                  <div className="overflow-hidden">
-                    <div className="flex h-full gap-8 px-5 pb-6 md:p-8">
-                      <div className="flex flex-1 flex-col justify-between">
-                        <h3 className="c3-display hidden text-[2.6rem] md:block">{v.t}</h3>
-                        <p className="max-w-[36ch] text-[1.0625rem] md:text-[1.125rem]">{v.p}</p>
-                      </div>
-                      {v.img && <img src={v.img} alt={v.alt} loading="lazy" decoding="async" className="hidden h-full w-[46%] rounded-[10px] object-cover md:block" />}
+    <section id="visits" ref={root} className="relative bg-off lg:h-[460svh] motion-reduce:lg:h-auto">
+      <div className="px-[var(--m)] py-24 md:py-32 lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:items-center lg:py-0 motion-reduce:lg:static motion-reduce:lg:h-auto motion-reduce:lg:py-32">
+        <div className="mx-auto w-full max-w-[1400px] lg:pt-[72px]">
+          <div className="grid gap-6 md:grid-cols-12 md:items-end">
+            <h2 className="c3-display text-[clamp(2.4rem,4.2vw,4rem)] text-pur md:col-span-6" data-reveal>How a visit <br />works</h2>
+            <div className="md:col-span-5 md:col-start-8" data-reveal="0.1">
+              <p className="max-w-[40ch] text-[1.125rem]">Five simple stages, the same whether you come for one treatment or a long-term plan. Illustrative; the practice confirms its own process.</p>
+              <div className="mt-5 hidden items-center gap-4 lg:flex motion-reduce:lg:hidden" aria-hidden="true">
+                <span className="text-[0.9375rem] font-medium text-pur">{open + 1} of {VISITS.length}</span>
+                <span className="h-1 flex-1 overflow-hidden rounded-full bg-lav-2"><span ref={bar} className="block h-full w-full origin-left rounded-full bg-pur" style={{ transform: 'scaleX(0)' }} /></span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-10 flex flex-col gap-2 md:h-[min(60svh,560px)] md:min-h-[440px] md:flex-row md:gap-0 md:overflow-hidden md:rounded-[16px] lg:mt-12" data-reveal="0.15">
+            {VISITS.map((v, i) => {
+              const on = open === i;
+              return (
+                <div key={v.t} className={`relative overflow-hidden rounded-[14px] md:rounded-none ${v.c} max-md:!flex-none transition-[flex-grow] duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)]`} style={{ flexGrow: on ? 7 : 1, flexBasis: 0 }}>
+                  <button type="button" onClick={() => pick(i)} aria-expanded={on} aria-label={`Stage ${i + 1}: ${v.t}`}
+                    className={`flex h-16 w-full items-center gap-3 px-5 text-left md:absolute md:inset-0 md:h-full md:flex-col md:items-start md:justify-between md:px-0 md:py-7 ${on ? 'md:pointer-events-none' : ''}`}>
+                    <span className={`text-[0.9375rem] font-medium opacity-70 md:self-center ${on ? 'md:invisible' : ''}`}>0{i + 1}</span>
+                    <span className={`text-[1.125rem] font-bold md:self-center md:text-[1.25rem] ${on ? 'md:hidden' : 'md:[writing-mode:vertical-rl] md:rotate-180'}`}>{v.t}</span>
+                  </button>
+                  <div className={`grid transition-[grid-template-rows] duration-500 md:absolute md:inset-0 md:block ${on ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] md:hidden'}`}>
+                    <div className="overflow-hidden md:h-full">
+                      {on && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.15 }}
+                          className="grid h-full gap-6 px-5 pb-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] md:gap-10 md:p-8 lg:p-10">
+                          <div className="flex min-w-0 flex-col md:justify-between">
+                            <div className="hidden md:block">
+                              <p className="text-[0.9375rem] font-medium opacity-70">Stage 0{i + 1}</p>
+                              <h3 className="c3-display mt-3 text-[clamp(2.6rem,4.4vw,4.6rem)] leading-[0.95]">{v.t}</h3>
+                            </div>
+                            <p className="max-w-[34ch] text-[1.0625rem] leading-relaxed md:text-[1.1875rem]">{v.p}</p>
+                          </div>
+                          <motion.img key={v.img} src={v.img} alt={v.alt} loading="lazy" decoding="async"
+                            initial={{ clipPath: 'inset(0 0 0 100%)', scale: 1.08 }} animate={{ clipPath: 'inset(0 0 0 0%)', scale: 1 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                            style={{ objectPosition: v.pos }} className="hidden h-full min-h-0 w-full rounded-[12px] object-cover md:block" />
+                        </motion.div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
