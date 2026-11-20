@@ -279,7 +279,7 @@ function Hero() {
             <span className="c3-line"><span className="!inline-block"><span ref={(n) => { lines.current[1] = n; }} className="inline-block">Live differently.</span></span></span>
           </h1>
         </div>
-        <div ref={intro} className="absolute inset-x-0 bottom-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-5 px-[var(--m)] pb-7 md:flex-row md:items-end md:justify-between md:pb-9">
+        <div ref={intro} className="absolute inset-x-0 bottom-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-5 px-[var(--m)] pb-7 md:pb-9 lg:flex-row lg:items-end lg:justify-between">
           <p className="c3-fade max-w-[30ch] text-[clamp(1.0625rem,1rem+0.5vw,1.375rem)] font-medium text-gra">Physician-led wellness and aesthetics in Florida, designed around real people.</p>
           <div className="c3-fade flex flex-wrap gap-3">
             <a href="#care" onClick={(e) => go(e, '#care')} className="inline-flex min-h-[52px] items-center gap-2 rounded-full bg-pur px-7 font-medium text-off transition-transform hover:-translate-y-0.5">Explore what's possible <ArrowRight size={18} /></a>
@@ -394,34 +394,34 @@ function Services() {
   }, []);
   return (
     <section id="care" ref={root} className="bg-lav px-[var(--m)] py-24 text-pur md:py-32">
-      <div className="sv-grid mx-auto grid max-w-[1400px] grid-cols-2 gap-2 md:grid-cols-12 md:grid-rows-[repeat(8,96px)]">
-        <div className="sv-static col-span-2 flex flex-col justify-between rounded-[14px] bg-lav-2 p-6 md:col-span-6 md:row-span-3">
+      <div className="sv-grid mx-auto grid max-w-[1400px] grid-cols-2 gap-2 lg:grid-cols-12 lg:grid-rows-[repeat(8,96px)]">
+        <div className="sv-static col-span-2 flex flex-col justify-between rounded-[14px] bg-lav-2 p-6 lg:col-span-6 lg:row-span-3">
           <h2 className="c3-display text-[clamp(2.6rem,5.4vw,5rem)]">Ways we <br />can help</h2>
           <p className="mt-4 max-w-[36ch] text-[1rem] text-gra">Placeholder service areas. Tap any tile to see how it works. The final menu is confirmed with Dr. Varney.</p>
         </div>
-        <Tile id="wellness" onOpen={setOpen} className="col-span-2 min-h-[360px] bg-pur p-0 md:col-span-6 md:row-span-5 md:min-h-0">
+        <Tile id="wellness" onOpen={setOpen} className="col-span-2 min-h-[360px] bg-pur p-0 lg:col-span-6 lg:row-span-5 lg:min-h-0">
           <img src={SERVICES.wellness.img} alt={SERVICES.wellness.alt} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
           <span className="absolute left-5 top-5 rounded-full bg-off px-4 py-2 text-[1.0625rem] font-medium text-pur">Personalized Wellness</span>
         </Tile>
-        <Tile id="aesthetic" onOpen={setOpen} className="col-span-2 min-h-[200px] bg-cor text-gra md:col-span-3 md:row-span-2 md:min-h-0">
+        <Tile id="aesthetic" onOpen={setOpen} className="col-span-2 md:col-span-1 min-h-[200px] bg-cor text-gra lg:col-span-3 lg:row-span-2 lg:min-h-0">
           <span className="block text-[1.5rem] font-bold leading-tight">Advanced Aesthetic Care</span>
           <span className="mt-2 block max-w-[22ch] text-[1rem]">Results that still look like you.</span>
         </Tile>
-        <Tile id="health" onOpen={setOpen} className="col-span-2 min-h-[200px] bg-pur text-off md:col-span-3 md:row-span-2 md:min-h-0">
+        <Tile id="health" onOpen={setOpen} className="col-span-2 md:col-span-1 min-h-[200px] bg-pur text-off lg:col-span-3 lg:row-span-2 lg:min-h-0">
           <span className="block text-[1.5rem] font-bold leading-tight">Health & Wellbeing</span>
           <span className="mt-2 block max-w-[22ch] text-[1rem] text-lav">A doctor who knows your story.</span>
         </Tile>
-        <div className="sv-static col-span-1 rounded-[14px] bg-off p-6 text-gra md:col-span-3 md:row-span-3">
+        <div className="sv-static col-span-2 md:col-span-1 rounded-[14px] bg-off p-6 text-gra lg:col-span-3 lg:row-span-3">
           <h3 className="text-[1.125rem] font-bold text-pur">Every first visit</h3>
           <ul className="mt-3 space-y-1.5 text-[1rem]">
             {VISIT_STEPS.map((v) => <li key={v}>{v}</li>)}
           </ul>
         </div>
-        <Tile id="parties" onOpen={setOpen} className="col-span-2 min-h-[300px] p-0 md:col-span-6 md:row-span-3 md:min-h-0">
+        <Tile id="parties" onOpen={setOpen} className="col-span-2 min-h-[300px] p-0 md:order-last lg:order-none lg:col-span-6 lg:row-span-3 lg:min-h-0">
           <img src={SERVICES.parties.img} alt={SERVICES.parties.alt} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
           <span className="absolute left-5 top-5 rounded-full bg-cor px-4 py-2 text-[1.0625rem] font-medium text-gra">Private Botox Parties</span>
         </Tile>
-        <div className="sv-static col-span-1 flex items-end rounded-[14px] bg-pur-3 p-6 text-off md:col-span-3 md:row-span-3">
+        <div className="sv-static col-span-2 md:col-span-1 flex min-h-[160px] items-end rounded-[14px] bg-pur-3 p-6 text-off lg:col-span-3 lg:row-span-3 lg:min-h-0">
           <p className="text-[clamp(1.375rem,1.1rem+1vw,2rem)] font-bold leading-[1.1]">You lead. <br />We guide.</p>
         </div>
       </div>
@@ -470,8 +470,8 @@ function Moments() {
     <section id="moments" ref={root} className="relative bg-cor text-gra lg:h-[360svh]">
       <div className="overflow-hidden px-[var(--m)] py-24 md:py-28 lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:items-center lg:py-0">
       <span className="absolute left-[calc(var(--m)/2)] top-1/2 hidden h-[40svh] w-1 -translate-y-1/2 overflow-hidden rounded-full bg-[#E5674F] lg:block" aria-hidden="true"><span ref={bar} className="block h-full w-full origin-top rounded-full bg-gra" style={{ transform: 'scaleY(0)' }} /></span>
-      <div className="mx-auto grid w-full max-w-[1400px] items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div className="order-2 lg:order-1">
+      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="order-2 min-w-0 lg:order-1">
           <h2 className="c3-display text-[clamp(2.4rem,4.6vw,4.4rem)]" data-reveal>Made for <br />real moments</h2>
           <div className="-mx-[var(--m)] mt-8 flex gap-6 overflow-x-auto px-[var(--m)] pb-2 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:px-0" role="tablist" aria-label="Moments">
             {MOMENTS.map((x, k) => (
@@ -638,7 +638,7 @@ function Contact() {
         ))}
       </div>
       <div className="mx-auto max-w-[1400px] px-[var(--m)]">
-        <div className="mt-16 flex flex-col gap-6 md:mt-20 lg:flex-row lg:items-end lg:justify-between"><h2 className="c3-display text-[clamp(2.4rem,6vw,5.4rem)]" data-reveal>Start with <br />a conversation</h2><p className="max-w-[30ch] text-[1.125rem] text-gra lg:text-right" data-reveal="0.1">Prefer to talk? Phone placeholder. The practice confirms its contact details before launch.</p></div>
+        <div className="mt-16 flex flex-col gap-6 md:mt-20 lg:flex-row lg:items-end lg:justify-between"><h2 className="c3-display text-[clamp(2.4rem,6vw,5.4rem)]" data-reveal>Start with <br />a conversation</h2><p className="max-w-[30ch] text-[1.125rem] text-gra" data-reveal="0.1">Prefer to talk? Phone placeholder. The practice confirms its contact details before launch.</p></div>
         {!sent ? (
           <form onSubmit={submit} noValidate className="mt-10 grid gap-2 md:grid-cols-3" data-reveal="0.1">
             <label htmlFor="c3-name" className="sr-only">Your name</label>
@@ -659,7 +659,7 @@ function Contact() {
 /* ------------------------------------------------------------------ footer: contact as the headline */
 function Footer() {
   return (
-    <footer className="flex min-h-[78svh] flex-col bg-cor px-[var(--m)] pb-8 pt-10 text-gra">
+    <footer className="flex flex-col lg:min-h-[78svh] bg-cor px-[var(--m)] pb-8 pt-10 text-gra">
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 md:flex-row md:justify-between">
         <div className="grid gap-4 text-[0.9375rem] sm:grid-cols-3 md:gap-10">
           <p><span className="c3-display block text-[1.25rem] text-gra">Varney<span className="text-pur">.</span></span>Physician-led wellness</p>
