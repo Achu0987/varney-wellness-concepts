@@ -1,6 +1,7 @@
 'use client';
 import { A } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -8,7 +9,6 @@ import { Building2, Home, MapPin, Check, ArrowDown, Sparkles, Users, CalendarDay
 
 gsap.registerPlugin(ScrollTrigger);
 const ease = [0.22, 1, 0.36, 1];
-const toast = (m) => window.dispatchEvent(new CustomEvent('c2-toast', { detail: m }));
 
 const OCC = [
   { t: 'Bridal gathering', short: 'a bridal gathering', img: A('/c2/bridal.jpg') },
@@ -82,6 +82,7 @@ export default function Concierge() {
   const [v, setV] = useState(0);
   const [date, setDate] = useState('');
   const [time, setTime] = useState(1);
+  const router = useRouter();
   const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   const dateText = date ? new Date(`${date}T00:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : 'a date of your choosing';
 
@@ -170,7 +171,7 @@ export default function Concierge() {
           {/* questions, one screen each */}
           <div>
             {/* 1. occasion */}
-            <fieldset ref={(n) => { panels.current[0] = n; }} className="m-0 flex min-h-[92svh] flex-col justify-center border-0 p-0 py-16">
+            <fieldset ref={(n) => { panels.current[0] = n; }} className="m-0 flex flex-col justify-center border-0 p-0 py-14 lg:min-h-[92svh] lg:py-16">
               <p className="cc-q text-[1rem] text-[#C5A77B]">Step 1 of 4</p>
               <legend className="contents"><span className="cc-q c2-serif mt-3 block text-[clamp(2.2rem,4vw,3.6rem)] leading-tight">What are we celebrating?</span></legend>
               <div className="mt-9 grid grid-cols-2 gap-4 sm:grid-cols-3" role="radiogroup" aria-label="Occasion">
@@ -189,7 +190,7 @@ export default function Concierge() {
             </fieldset>
 
             {/* 2. guests */}
-            <fieldset ref={(n) => { panels.current[1] = n; }} className="m-0 flex min-h-[92svh] flex-col justify-center border-0 p-0 py-16">
+            <fieldset ref={(n) => { panels.current[1] = n; }} className="m-0 flex flex-col justify-center border-0 p-0 py-14 lg:min-h-[92svh] lg:py-16">
               <p className="cc-q text-[1rem] text-[#C5A77B]">Step 2 of 4</p>
               <legend className="contents"><span className="cc-q c2-serif mt-3 block text-[clamp(2.2rem,4vw,3.6rem)] leading-tight">How many will join you?</span></legend>
               <div className="mt-9 flex flex-col items-start gap-8 sm:flex-row sm:items-center">
@@ -206,23 +207,23 @@ export default function Concierge() {
             </fieldset>
 
             {/* 3. setting */}
-            <fieldset ref={(n) => { panels.current[2] = n; }} className="m-0 flex min-h-[92svh] flex-col justify-center border-0 p-0 py-16">
+            <fieldset ref={(n) => { panels.current[2] = n; }} className="m-0 flex flex-col justify-center border-0 p-0 py-14 lg:min-h-[92svh] lg:py-16">
               <p className="cc-q text-[1rem] text-[#C5A77B]">Step 3 of 4</p>
               <legend className="contents"><span className="cc-q c2-serif mt-3 block text-[clamp(2.2rem,4vw,3.6rem)] leading-tight">Where shall we gather?</span></legend>
               <div className="mt-9 grid gap-4 sm:grid-cols-3" role="radiogroup" aria-label="Setting">
                 {VENUES.map((ve, i) => (
                   <button key={ve.t} type="button" role="radio" aria-checked={v === i} onClick={() => choose(setV, i, 3)}
-                    className={`cc-opt flex h-64 flex-col items-center justify-end rounded-t-full p-6 pb-8 text-center transition-[background-color,color,transform] duration-500 hover:-translate-y-1 ${v === i ? 'bg-[#F7F3EC] text-[#173B35]' : 'bg-[#1f4a43] hover:bg-[#28574f]'}`}>
+                    className={`cc-opt flex min-h-[84px] flex-row items-center gap-4 rounded-[1.25rem] p-5 text-left sm:h-64 sm:min-h-0 sm:flex-col sm:items-center sm:justify-end sm:gap-0 sm:rounded-b-none sm:rounded-t-full sm:p-6 sm:pb-8 sm:text-center transition-[background-color,color,transform] duration-500 hover:-translate-y-1 ${v === i ? 'bg-[#F7F3EC] text-[#173B35]' : 'bg-[#1f4a43] hover:bg-[#28574f]'}`}>
                     <ve.icon size={28} strokeWidth={1.4} className={v === i ? 'text-[#173B35]' : 'text-[#C5A77B]'} />
-                    <span className="c2-serif mt-4 text-[1.4rem] leading-tight">{ve.t}</span>
-                    <span className="mt-1 text-[0.9rem] opacity-70">{ve.note}</span>
+                    <span className="c2-serif text-[1.4rem] leading-tight sm:mt-4">{ve.t}</span>
+                    <span className="ml-auto text-[0.9rem] opacity-80 sm:ml-0 sm:mt-1">{ve.note}</span>
                   </button>
                 ))}
               </div>
             </fieldset>
 
             {/* 4. date */}
-            <fieldset ref={(n) => { panels.current[3] = n; }} className="m-0 flex min-h-[92svh] flex-col justify-center border-0 p-0 py-16">
+            <fieldset ref={(n) => { panels.current[3] = n; }} className="m-0 flex flex-col justify-center border-0 p-0 py-14 lg:min-h-[92svh] lg:py-16">
               <p className="cc-q text-[1rem] text-[#C5A77B]">Step 4 of 4</p>
               <legend className="contents"><span className="cc-q c2-serif mt-3 block text-[clamp(2.2rem,4vw,3.6rem)] leading-tight">When would you like it?</span></legend>
               <div className="mt-9 grid max-w-[34rem] gap-7">
@@ -242,12 +243,12 @@ export default function Concierge() {
             </fieldset>
 
             {/* review */}
-            <div ref={(n) => { panels.current[4] = n; }} className="flex min-h-[80svh] flex-col justify-center pb-28 pt-10">
+            <div ref={(n) => { panels.current[4] = n; }} className="flex flex-col justify-center pb-20 pt-10 lg:min-h-[80svh] lg:pb-28">
               <p className="cc-q text-[1rem] text-[#C5A77B]">All set</p>
               <h3 className="cc-q c2-serif mt-3 text-[clamp(2.2rem,4vw,3.6rem)] leading-tight">Your invitation is ready.</h3>
               <div className="cc-q mt-6 max-w-[40ch] text-[#F7F3EC]/85 lg:hidden">{sentence}</div>
               <p className="cc-q mt-6 max-w-[40ch] text-[1.1rem] leading-relaxed text-[#F7F3EC]/75">Send it to our concierge. The practice replies to confirm availability, eligibility and the details.</p>
-              <button type="button" onClick={() => toast('Preview only: nothing was sent or booked.')} className="cc-q group mt-9 inline-flex h-16 w-fit items-center gap-3 rounded-full bg-[#C5A77B] pl-8 pr-2 text-[1.05rem] text-[#173B35] transition-colors hover:bg-[#d6bb92]">Request this experience <span className="grid h-12 w-12 place-items-center rounded-full bg-[#173B35] text-[#F7F3EC] transition-transform duration-500 group-hover:rotate-[-45deg]"><ArrowDown size={18} className="-rotate-90" /></span></button>
+              <button type="button" onClick={() => { const note = `Private party inquiry: ${OCC[occ].t}, ${GUESTS[g][0]} guests, ${VENUES[v].t.toLowerCase()}, ${dateText}, ${TIMES[time].toLowerCase()}.`; router.push(`/concept-2/contact?topic=party&note=${encodeURIComponent(note)}#request`); }} className="cc-q group mt-9 inline-flex h-16 w-fit items-center gap-3 rounded-full bg-[#C5A77B] pl-8 pr-2 text-[1.05rem] text-[#173B35] transition-colors hover:bg-[#d6bb92]">Request this experience <span className="grid h-12 w-12 place-items-center rounded-full bg-[#173B35] text-[#F7F3EC] transition-transform duration-500 group-hover:rotate-[-45deg]"><ArrowDown size={18} className="-rotate-90" /></span></button>
               <p className="cc-q mt-6 max-w-[46ch] text-[0.875rem] leading-snug text-[#F7F3EC]/55">Event inquiry only. Treatment eligibility, medical assessment, consent, supervision and venue suitability remain subject to the practice’s approval.</p>
             </div>
           </div>

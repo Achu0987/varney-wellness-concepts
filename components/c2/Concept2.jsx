@@ -6,14 +6,16 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown, ArrowUpRight, Menu, X } from 'lucide-react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 import Concierge from './Concierge';
+import { Nav, Footer, Toast, R } from './site/Site';
+import { SERVICES as SV } from './site/data';
 
 gsap.registerPlugin(ScrollTrigger);
 const ClubRoom = dynamic(() => import('./ClubRoom'), { ssr: false });
 const ease = [0.22, 1, 0.36, 1];
 const IVORY = '#F7F3EC';
-const LINKS = [['The Club', '#club'], ['Experience', '#experience'], ['Services', '#services'], ['Private Parties', '#parties'], ['Contact', '#contact']];
 
 function go(e, href) {
   e?.preventDefault();
@@ -21,7 +23,6 @@ function go(e, href) {
   if (!el) return;
   if (window.__lenis) window.__lenis.scrollTo(el, { duration: 1.8 }); else el.scrollIntoView({ behavior: 'smooth' });
 }
-const toast = (m) => window.dispatchEvent(new CustomEvent('c2-toast', { detail: m }));
 
 /* ------------------------------------------------------------------ loader: a gold arch is drawn, then the curtain lifts */
 function Loader({ onDone }) {
@@ -56,58 +57,6 @@ function Loader({ onDone }) {
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-/* ------------------------------------------------------------------ nav */
-function Nav() {
-  const [open, setOpen] = useState(false);
-  const [shown, setShown] = useState(true);
-  useEffect(() => {
-    if (!window.__c2Loading) { setShown(true); return undefined; }
-    const on = () => setShown(true);
-    window.addEventListener('c2-entered', on, { once: true });
-    return () => window.removeEventListener('c2-entered', on);
-  }, []);
-  const [solid, setSolid] = useState(false);
-  useEffect(() => {
-    const on = () => setSolid(window.scrollY > 60);
-    window.addEventListener('scroll', on, { passive: true });
-    return () => window.removeEventListener('scroll', on);
-  }, []);
-  return (
-    <>
-      <header className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-[var(--m)] py-5 transition-[color,background-color,opacity,transform] duration-700 ${solid ? 'bg-[#F7F3EC] py-3.5 shadow-[0_10px_30px_-20px_rgba(23,59,53,0.35)]' : ''}`}>
-        <a href="#top" onClick={(e) => go(e, '#top')} className="leading-none text-[#173B35]" aria-label="Varney Wellness, back to top">
-          <span data-brand className="c2-serif text-[1.65rem] transition-opacity duration-300" style={{ opacity: shown ? 1 : 0 }}>Varney Wellness</span>
-        </a>
-        <nav aria-label="Primary" className="hidden lg:block">
-          <ul className="flex gap-9 text-[0.92rem] text-[#242424]/80">
-            {LINKS.map(([l, h]) => (
-              <li key={h}><a href={h} onClick={(e) => go(e, h)} className="group relative py-1 transition-colors hover:text-[#173B35]">{l}<span className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-[#C5A77B] transition-transform duration-500 group-hover:scale-x-100" /></a></li>
-            ))}
-          </ul>
-        </nav>
-        <div className="flex items-center gap-3">
-          <a href="#contact" onClick={(e) => go(e, '#contact')} className="hidden h-11 items-center rounded-full border border-[#173B35] px-6 text-[0.9rem] text-[#173B35] transition-colors hover:bg-[#173B35] hover:text-[#F7F3EC] sm:inline-flex">Book a Consultation</a>
-          <button type="button" onClick={() => setOpen(true)} aria-label="Open menu" className="grid h-11 w-11 place-items-center rounded-full bg-[#173B35] text-[#F7F3EC] lg:hidden"><Menu size={18} /></button>
-        </div>
-      </header>
-      <AnimatePresence>
-        {open && (
-          <motion.div initial={{ clipPath: 'inset(0 0 100% 0)' }} animate={{ clipPath: 'inset(0 0 0% 0)' }} exit={{ clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }} className="fixed inset-0 z-[60] flex flex-col bg-[#173B35] px-[var(--m)] py-6 text-[#F7F3EC]">
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="ml-auto grid h-11 w-11 place-items-center rounded-full border border-[#F7F3EC]/30"><X size={18} /></button>
-            <ul className="mt-12 grid gap-3">
-              {LINKS.map(([l, h], i) => (
-                <motion.li key={h} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.07, duration: 0.7, ease }}>
-                  <a href={h} onClick={(e) => { setOpen(false); go(e, h); }} className="c2-serif block text-[12vw] leading-[1.05]">{l}</a>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
   );
 }
 
@@ -333,7 +282,7 @@ function InsideClub() {
             <p className="mt-5 max-w-[32ch] text-[1.15rem] leading-relaxed text-[#F7F3EC]/85">{st.d}</p>
             {st.cta && (
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#contact" onClick={(e) => go(e, '#contact')} className="group inline-flex h-14 items-center gap-3 rounded-full bg-[#F7F3EC] pl-7 pr-2 text-[#173B35] transition-colors hover:bg-white">Book a Consultation <span className="grid h-10 w-10 place-items-center rounded-full bg-[#C5A77B] transition-transform duration-500 group-hover:rotate-45"><ArrowUpRight size={18} /></span></a>
+                <Link href={R('/contact')} className="group inline-flex h-14 items-center gap-3 rounded-full bg-[#F7F3EC] pl-7 pr-2 text-[#173B35] transition-colors hover:bg-white">Book a Consultation <span className="grid h-10 w-10 place-items-center rounded-full bg-[#C5A77B] transition-transform duration-500 group-hover:rotate-45"><ArrowUpRight size={18} /></span></Link>
                 <a href="#parties" onClick={(e) => go(e, '#parties')} className="inline-flex h-14 items-center rounded-full px-7 text-[#F7F3EC] ring-1 ring-[#F7F3EC]/60 transition-colors hover:bg-[#F7F3EC]/10">Private parties</a>
               </div>
             )}
@@ -380,12 +329,12 @@ function Services() {
         <ul className="sv-list mt-12" onPointerLeave={() => setHover(-1)}>
           {SERVICES.map((s, i) => (
             <li key={s.t} className="sv-row">
-              <a href="#contact" onClick={(e) => go(e, '#contact')} onPointerEnter={() => setHover(i)} className="group flex items-center justify-between gap-6 rounded-[1.5rem] px-2 py-7 transition-colors duration-500 hover:bg-[#ece5d8] md:px-6 md:py-9">
+              <Link href={R(`/services/${SV[i].slug}`)} onPointerEnter={() => setHover(i)} className="group flex items-center justify-between gap-6 rounded-[1.5rem] px-2 py-7 transition-colors duration-500 hover:bg-[#ece5d8] md:px-6 md:py-9">
                 <span className="flex items-baseline gap-6">
                   <span className={`c2-serif text-[clamp(2rem,4.6vw,4.4rem)] leading-none transition-[color,background-color,opacity,transform] duration-700 ${hover === -1 || hover === i ? 'text-[#173B35]' : 'text-[#173B35]/25'} group-hover:translate-x-4`}>{s.t}</span>
                 </span>
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#ece5d8] text-[#173B35] transition-[color,background-color,opacity,transform] duration-500 group-hover:rotate-45 group-hover:bg-[#173B35] group-hover:text-[#F7F3EC]"><ArrowUpRight size={18} /></span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -425,57 +374,10 @@ function Doctor() {
           <h2 className="dr-in c2-serif text-[clamp(2.6rem,5.2vw,5.2rem)] leading-[0.98] text-[#173B35]">Dr. Joseph Varney, MD</h2>
           <p className="dr-in c2-serif mt-8 text-[clamp(1.4rem,2.2vw,2rem)] leading-snug text-[#242424]/85">“Introduction placeholder. A personal note from Dr. Varney on his approach to care will appear here.”</p>
           <p className="dr-in mt-6 max-w-[46ch] text-[#242424]/65">No qualifications, awards or credentials are shown until they are supplied and confirmed by the practice.</p>
-          <a href="#contact" onClick={(e) => go(e, '#contact')} className="dr-in mt-10 inline-flex h-14 items-center rounded-full bg-[#173B35] px-8 text-[#F7F3EC] transition-colors hover:bg-[#0f2a25]">Book a Consultation</a>
+          <div className="dr-in mt-10 flex flex-wrap items-center gap-6"><Link href={R('/contact')} className="inline-flex h-14 items-center rounded-full bg-[#173B35] px-8 text-[#F7F3EC] transition-colors hover:bg-[#0f2a25]">Book a Consultation</Link><Link href={R('/dr-varney')} className="text-[#173B35] underline decoration-[#C5A77B] decoration-2 underline-offset-4">Meet Dr. Varney</Link></div>
         </div>
       </div>
     </section>
-  );
-}
-
-/* ------------------------------------------------------------------ newsletter + footer */
-function Footer() {
-  const [msg, setMsg] = useState('');
-  return (
-    <footer id="contact" className="relative overflow-hidden bg-[#173B35] px-[var(--m)] pb-10 pt-28 text-[#F7F3EC]">
-      <div className="mx-auto grid max-w-[1360px] gap-14 lg:grid-cols-[1.1fr_0.9fr]">
-        <div>
-          <h2 data-reveal className="c2-serif text-[clamp(2.4rem,5vw,4.8rem)] leading-[1.0]">Your next chapter begins quietly.</h2>
-          <a href="#contact" onClick={(e) => { e.preventDefault(); toast('Consultation booking is not part of this concept preview.'); }} className="mt-10 inline-flex h-14 items-center rounded-full bg-[#C5A77B] px-8 text-[#173B35] transition-colors hover:bg-[#d6bb92]">Book a Consultation</a>
-        </div>
-        <form onSubmit={(e) => { e.preventDefault(); const v = e.currentTarget.elements.email.value; setMsg(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? 'Thank you. This is a preview, so nothing was stored.' : 'Please enter a valid email address.'); }} className="self-end" noValidate data-reveal="0.15">
-          <p className="c2-serif text-[1.6rem]">The Varney Letter</p>
-          <p className="mt-2 text-[#F7F3EC]/65">Occasional notes on wellbeing. Subscription preview only.</p>
-          <div className="mt-6 flex items-center gap-3">
-            <label htmlFor="c2-email" className="sr-only">Email</label>
-            <input id="c2-email" name="email" type="email" placeholder="Your email address" className="flex-1 border-0 border-b border-[#C5A77B]/60 bg-transparent py-3 text-[1.1rem] text-[#F7F3EC] placeholder:text-[#F7F3EC]/40 focus:outline-none" />
-            <button type="submit" className="grid h-11 w-11 place-items-center rounded-full bg-[#F7F3EC] text-[#173B35]" aria-label="Subscribe"><ArrowUpRight size={18} /></button>
-          </div>
-          <p className="mt-3 min-h-[1.5em] text-[0.9rem] text-[#C5A77B]" role="status">{msg}</p>
-        </form>
-      </div>
-      <p className="c2-serif mx-auto mt-24 max-w-[1360px] select-none text-center text-[clamp(4rem,20vw,19rem)] leading-[0.8] tracking-[0.06em] text-[#F7F3EC]/[0.07]" aria-hidden="true">VARNEY</p>
-      <div data-reveal="0.1" className="mx-auto mt-10 grid max-w-[1360px] gap-6 rounded-[1.5rem] bg-[#12302b] p-8 text-[0.9rem] text-[#F7F3EC]/75 md:grid-cols-4">
-        <p>Varney Wellness<br />A private wellness club</p>
-        <p>Address placeholder<br />Florida, USA</p>
-        <p>Hours and contact details<br />to be supplied by the practice</p>
-        <p>Concept 02 of 03, illustrative preview. 3D room: Poly Haven (CC0); velvet sofa by Wayfair (CC BY 4.0). Photos: Unsplash and Wikimedia Commons (stock placeholders).</p>
-      </div>
-    </footer>
-  );
-}
-
-function Toast() {
-  const [msg, setMsg] = useState('');
-  useEffect(() => {
-    let t;
-    const on = (e) => { setMsg(e.detail); clearTimeout(t); t = setTimeout(() => setMsg(''), 3600); };
-    window.addEventListener('c2-toast', on);
-    return () => window.removeEventListener('c2-toast', on);
-  }, []);
-  return (
-    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-[80] flex justify-center px-4">
-      <AnimatePresence>{msg && <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="rounded-full bg-[#173B35] px-6 py-3 text-[0.95rem] text-[#F7F3EC] shadow-xl">{msg}</motion.p>}</AnimatePresence>
-    </div>
   );
 }
 
@@ -519,7 +421,7 @@ export default function Concept2() {
         <Concierge />
         <Doctor />
       </main>
-      <Footer />
+      <Footer id="contact" />
       <Toast />
     </div>
   );

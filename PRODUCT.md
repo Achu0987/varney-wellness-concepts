@@ -7,7 +7,7 @@
 web
 
 ## Stack
-delegated: Vite multi-page project, vanilla JavaScript modules, Three.js, GSAP + ScrollTrigger, plain CSS. Chosen for speed and static deploy (three concepts, one build). Next.js/React from the brief were optional; revisit for the production build. (Inferred from the brief; the user was not interviewed because of the same-day deadline.)
+Next.js 14 (app router), Tailwind CSS, GSAP + ScrollTrigger, Lenis, Framer Motion; static export to GitHub Pages.
 
 ## Users
 Primary: Socialsect's project coordinator, who will present three homepage concepts to Dr. Joseph Varney, MD (Florida, USA) to win a ~USD 5,000 custom website project. End audience of the eventual site: adults in Florida looking for wellness and aesthetic care, and hosts planning private group events.
@@ -22,7 +22,7 @@ Distinctive feature discussed with the doctor: private Botox Party inquiries, wh
 Client is not yet confirmed; project is at pitch stage. Domain varneywellness.com (was parked). Long-term vision (not for now): EMR, CRM, patient portal, email marketing, more domains.
 
 ## Capabilities and Constraints
-- Homepage only per concept; no secondary pages, backend, integrations or real booking.
+- Concept 02 was chosen by the client (Nov 2026). Its inner pages are now in scope as design and structure only (The Club, Dr. Varney, Services and four service pages, Private Parties, Your Visit, Contact, FAQ, legal). Still no backend, integrations or real booking.
 - Botox Party section is a visual/interactive demo; it is an event inquiry only and must not promise treatment eligibility. Treatment, assessment, consent, supervision and venue suitability are subject to the practice's approval.
 - Services, address, doctor bio and photo are unconfirmed: use clearly labelled placeholders. Do not invent treatments, testimonials, results, address or a Google Business Profile.
 - Content/service availability (including Botox and event formats) must be confirmed with the doctor before publication.
